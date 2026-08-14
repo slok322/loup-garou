@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Nuit au Village — Loup-Garou</title>
+<style>
+  :root{
+    --night-deep:#0b1024;
+    --night-mid:#141b3a;
+    --night-soft:#1f2a52;
+    --moon:#eef1f8;
+    --moon-dim:#a9b3d6;
+    --lantern:#e3a857;
+    --blood:#b3273e;
+    --blood-glow:#ff4d63;
+    --leaf:#5c8a5c;
+    --arcane:#8a6fd6;
+    --arcane-glow:#a98cff;
+    --ember:#d97a3f;
+    --ember-glow:#f5975f;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 50% -10%, #2a3766 0%, var(--night-mid) 45%, var(--night-deep) 100%);
+    color:var(--moon);
+    font-family:var(--font-body);
+    display:flex;
+    justify-content:center;
+    overflow-x:hidden;
+  }
+  @font-face{
+    font-family:'Cormorant Garamond';
+    src:local('Cormorant Garamond');
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    padding:env(safe-area-inset-top,20px) 18px calc(env(safe-area-inset-bottom,20px) + 20px);
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+
+  /* stars */
+  .stars{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; transition:opacity .8s ease;}
+  .star{position:absolute; width:2px; height:2px; background:var(--moon); border-radius:50%; opacity:.5; animation:twinkle 3.5s ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:.15;} 50%{opacity:.8;}}
+
+  /* vignette d'ambiance nuit/jour */
+  .vignette{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(circle at 50% 15%, rgba(255,255,255,0) 0%, rgba(4,7,20,.55) 100%);
+    opacity:1;
+    transition:background 1.1s ease, opacity 1.1s ease;
+  }
+  .vignette.day{
+    background:radial-gradient(circle at 50% 0%, rgba(227,168,87,.16) 0%, rgba(4,7,20,.15) 75%);
+  }
+  body.day-mode .stars{ opacity:.15; }
+
+  #app > *{position:relative; z-index:1;}
+
+  /* fondu à chaque changement d'écran */
+  @keyframes screenIn{
+    from{ opacity:0; transform:translateY(8px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .card.entering{ animation:screenIn .45s ease both; }
+
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-6px); }
+    40%{ transform:translateX(5px); }
+    60%{ transform:translateX(-4px); }
+    80%{ transform:translateX(3px); }
+  }
+  .shake{ animation:shake .4s ease; }
+
+  header.top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-top:6px; margin-bottom:6px;
+  }
+  .brand{
+    font-family:var(--font-display);
+    font-size:22px; font-weight:600; letter-spacing:.5px; color:var(--moon);
+  }
+  .moon-phase{
+    width:26px;height:26px;border-radius:50%;
+    background:var(--moon);
+    box-shadow:0 0 14px 3px rgba(238,241,248,.55);
+    position:relative; overflow:hidden;
+    transition:box-shadow .4s;
+  }
+  .moon-phase.day{ background:var(--lantern); box-shadow:0 0 14px 3px rgba(227,168,87,.6);}
+  .moon-phase .shadow{
+    position:absolute; top:0; right:0; width:60%; height:100%;
+    background:var(--night-deep); border-radius:50%; transform:translateX(30%);
+  }
+
+  main{flex:1; display:flex; flex-direction:column; justify-content:center;}
+
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+    border:1px solid rgba(238,241,248,.1);
+    border-radius:18px;
+    padding:22px 20px;
+    backdrop-filter:blur(6px);
+  }
+
+  h1.hero{
+    font-family:var(--font-display);
+    font-size:40px;
+    line-height:1.05;
+    margin:10px 0 6px;
+    font-weight:600;
+  }
+  h1.hero em{ color:var(--blood-glow); font-style:normal; }
+  p.sub{ color:var(--moon-dim); font-size:15px; line-height:1.5; margin:0 0 22px;}
+
+  .btn{
+    display:block; width:100%;
+    padding:15px 18px;
+    border-radius:14px;
+    border:none;
+    font-size:16px;
+    font-weight:600;
+    font-family:var(--font-body);
+    cursor:pointer;
+    text-align:center;
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{
+    background:linear-gradient(135deg, var(--blood), #7c1830);
+    color:var(--moon);
+    box-shadow:0 6px 20px rgba(179,39,62,.35);
+  }
+  .btn-ghost{
+    background:rgba(238,241,248,.08);
+    color:var(--moon);
+    border:1px solid rgba(238,241,248,.18);
+    margin-top:10px;
+  }
+  .btn:disabled{ opacity:.4; filter:grayscale(.3); cursor:not-allowed; }
+  .btn-ghost.selected{
+    border-color:var(--leaf);
+    background:rgba(92,138,92,.22);
+    color:var(--moon);
+  }
+  .potion-note{
+    text-align:center; color:var(--moon-dim); font-size:12px; margin:8px 0 4px;
+  }
+  .stats-line{
+    text-align:center; color:var(--moon-dim); font-size:13px; margin:16px 0 0;
+  }
+
+  .eyebrow{
+    text-transform:uppercase; letter-spacing:2px; font-size:11px; color:var(--lantern);
+    font-weight:700; margin-bottom:8px;
+  }
+
+  /* role reveal */
+  .role-badge{
+    text-align:center; margin:14px 0 20px;
+  }
+  .role-icon{
+    width:84px;height:84px;border-radius:50%; margin:0 auto 14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:40px;
+    border:2px solid rgba(238,241,248,.2);
+  }
+  .role-icon.wolf{ background:radial-gradient(circle, rgba(179,39,62,.35), transparent 70%); box-shadow:0 0 30px rgba(179,39,62,.5);}
+  .role-icon.villager{ background:radial-gradient(circle, rgba(227,168,87,.3), transparent 70%); box-shadow:0 0 30px rgba(227,168,87,.4);}
+  .role-icon.seer{ background:radial-gradient(circle, rgba(138,111,214,.35), transparent 70%); box-shadow:0 0 30px rgba(138,111,214,.5);}
+  .role-icon.witch{ background:radial-gradient(circle, rgba(92,138,92,.35), transparent 70%); box-shadow:0 0 30px rgba(92,138,92,.5);}
+  .role-icon.hunter{ background:radial-gradient(circle, rgba(217,122,63,.35), transparent 70%); box-shadow:0 0 30px rgba(217,122,63,.5);}
+  .role-name{ font-family:var(--font-display); font-size:30px; font-weight:600;}
+  .role-name.wolf{ color:var(--blood-glow); }
+  .role-name.villager{ color:var(--lantern); }
+  .role-name.seer{ color:var(--arcane-glow); }
+  .role-name.witch{ color:var(--leaf); }
+  .role-name.hunter{ color:var(--ember-glow); }
+  .role-desc{ color:var(--moon-dim); font-size:14px; margin-top:8px; line-height:1.5; }
+
+  /* villagers grid */
+  .villagers{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0;
+  }
+  .villager{
+    border:1px solid rgba(238,241,248,.14);
+    background:rgba(255,255,255,.03);
+    border-radius:14px;
+    padding:14px 10px;
+    text-align:center;
+    cursor:pointer;
+    transition:.15s ease;
+    position:relative;
+  }
+  .villager.selectable:active{ transform:scale(.96); }
+  .villager.selected{
+    border-color:var(--blood-glow);
+    background:rgba(179,39,62,.18);
+    box-shadow:0 0 0 1px var(--blood-glow) inset;
+  }
+  .villager.dead{
+    opacity:.35;
+    filter:grayscale(1);
+    cursor:default;
+  }
+  .villager .avatar{ font-size:26px; margin-bottom:6px; display:block;}
+  .villager .name{ font-size:13px; font-weight:600; }
+  .villager .status{ font-size:10px; color:var(--moon-dim); margin-top:2px; }
+  .villager.you{ border-color:var(--lantern); }
+  .villager.you .name{ color:var(--lantern); }
+
+  .log{
+    background:rgba(0,0,0,.2);
+    border-radius:14px;
+    padding:14px 16px;
+    font-size:14px;
+    line-height:1.6;
+    color:var(--moon-dim);
+    max-height:180px;
+    overflow-y:auto;
+    margin-bottom:16px;
+  }
+  .log p{ margin:0 0 8px; color:var(--moon); }
+  .log p:last-child{ margin-bottom:0; }
+  .log .tag{ color:var(--lantern); font-weight:600; }
+  .log .tag.wolf{ color:var(--blood-glow); }
+
+  .phase-title{
+    font-family:var(--font-display);
+    font-size:26px; font-weight:600; margin:0 0 4px;
+  }
+  .phase-sub{ color:var(--moon-dim); font-size:13px; margin-bottom:16px;}
+
+  .hidden{ display:none !important; }
+
+  .center-note{
+    text-align:center; color:var(--moon-dim); font-size:13px; margin-top:14px;
+  }
+
+  footer.hint{
+    text-align:center; color:rgba(169,179,214,.5); font-size:11px; margin-top:18px;
+  }
+
+  .header-icons{ display:flex; align-items:center; gap:10px; }
+  .sound-toggle{
+    width:26px;height:26px; border-radius:50%; border:1px solid rgba(238,241,248,.18);
+    background:rgba(238,241,248,.08); color:var(--moon-dim);
+    display:flex; align-items:center; justify-content:center; font-size:13px;
+    cursor:pointer; padding:0;
+  }
+  .sound-toggle:active{ transform:scale(.92); }
+
+  .reveal-list{ margin:18px 0 4px; }
+  .reveal-row{
+    display:flex; align-items:center; gap:10px;
+    padding:8px 10px; border-radius:10px;
+    background:rgba(255,255,255,.03);
+    margin-bottom:6px; font-size:13px;
+  }
+  .reveal-row .avatar{ font-size:18px; }
+  .reveal-row .name{ flex:1; font-weight:600; }
+  .reveal-row .role{ font-size:12px; color:var(--moon-dim); text-align:right; max-width:140px; }
+  .reveal-row .role.wolf{ color:var(--blood-glow); }
+  .reveal-row .role.seer{ color:var(--arcane-glow); }
+  .reveal-row .role.witch{ color:var(--leaf); }
+  .reveal-row .role.hunter{ color:var(--ember-glow); }
+  .reveal-row .role.villager{ color:var(--lantern); }
+  .reveal-row.dead{ opacity:.6; }
+
+  .diff-row{ display:flex; gap:8px; margin:0 0 22px; }
+  .diff-btn{
+    flex:1; padding:10px 6px; border-radius:12px;
+    border:1px solid rgba(238,241,248,.16);
+    background:rgba(238,241,248,.05);
+    color:var(--moon-dim);
+    font-size:12px; font-weight:600;
+    cursor:pointer; text-align:center;
+  }
+  .diff-btn.active{
+    border-color:var(--lantern);
+    background:rgba(227,168,87,.16);
+    color:var(--moon);
+  }
+
+  .rule-row{
+    display:flex; gap:12px; align-items:flex-start;
+    padding:12px 0; border-bottom:1px solid rgba(238,241,248,.08);
+  }
+
+  /* ---- mode entre amis ---- */
+  .mode-row{ display:flex; gap:8px; margin:0 0 20px; }
+  .mode-btn{
+    flex:1; padding:12px 8px; border-radius:12px;
+    border:1px solid rgba(238,241,248,.16);
+    background:rgba(238,241,248,.05);
+    color:var(--moon-dim); font-size:13px; font-weight:700;
+    cursor:pointer; text-align:center;
+  }
+  .mode-btn.active{ border-color:var(--lantern); background:rgba(227,168,87,.16); color:var(--moon); }
+  .field{
+    width:100%; box-sizing:border-box;
+    background:rgba(255,255,255,.05); border:1px solid rgba(238,241,248,.18);
+    border-radius:12px; padding:13px 14px; color:var(--moon);
+    font-size:16px; font-family:var(--font-body); margin-bottom:12px;
+    text-align:center; letter-spacing:1px;
+  }
+  .field::placeholder{ color:var(--moon-dim); }
+  .field.code-field{ text-transform:uppercase; letter-spacing:6px; font-weight:700; font-size:22px; }
+  .mp-error{ color:var(--blood-glow); font-size:13px; text-align:center; margin:-4px 0 12px; min-height:16px; }
+  .room-code-display{
+    text-align:center; margin:6px 0 18px;
+  }
+  .room-code-display .code{
+    font-family:var(--font-display); font-size:44px; font-weight:700;
+    letter-spacing:8px; color:var(--lantern);
+  }
+  .room-code-display .hint2{ color:var(--moon-dim); font-size:12px; margin-top:4px; }
+  .mp-players{ margin:6px 0 18px; }
+  .mp-player-row{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:12px;
+    background:rgba(255,255,255,.04); margin-bottom:7px; font-size:14px;
+  }
+  .mp-player-row .avatar{ font-size:20px; }
+  .mp-player-row .name{ flex:1; font-weight:600; }
+  .mp-player-row .tag2{ font-size:11px; color:var(--lantern); font-weight:700; }
+  .mp-player-row.dead{ opacity:.4; text-decoration:line-through; }
+  .mp-wait-note{ text-align:center; color:var(--moon-dim); font-size:14px; padding:20px 0; }
+  .mp-wait-note .spin{ display:inline-block; animation:spin 1.4s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .settings-row{ display:flex; align-items:center; justify-content:space-between; padding:8px 0; font-size:14px; }
+  .settings-row .cnt-btns{ display:flex; align-items:center; gap:10px; }
+  .cnt-btn{
+    width:30px;height:30px;border-radius:50%; border:1px solid rgba(238,241,248,.2);
+    background:rgba(238,241,248,.08); color:var(--moon); font-size:16px; cursor:pointer;
+  }
+  .rule-row:last-child{ border-bottom:none; }
+  .rule-icon{ font-size:26px; line-height:1; flex-shrink:0; width:32px; text-align:center; }
+  .rule-name{ font-family:var(--font-display); font-size:18px; font-weight:600; margin-bottom:3px; }
+  .rule-name.wolf{ color:var(--blood-glow); }
+  .rule-name.seer{ color:var(--arcane-glow); }
+  .rule-name.witch{ color:var(--leaf); }
+  .rule-name.hunter{ color:var(--ember-glow); }
+  .rule-name.villager{ color:var(--lantern); }
+  .rule-desc{ color:var(--moon-dim); font-size:13px; line-height:1.45; }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="vignette" id="vignette"></div>
+
+<div id="app">
+  <header class="top">
+    <div class="brand">🌙 Nuit au Village</div>
+    <div class="header-icons">
+      <button class="sound-toggle" id="btnRules" aria-label="Règles du jeu">❓</button>
+      <button class="sound-toggle" id="btnSoundToggle" aria-label="Activer/couper le son">🔊</button>
+      <div class="moon-phase" id="moonPhase"><div class="shadow"></div></div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ÉCRAN 1 : ACCUEIL -->
+    <section id="screen-home" class="card">
+      <div class="eyebrow">Solo · vs Bots</div>
+      <h1 class="hero">Un <em>loup-garou</em><br>rôde ce soir.</h1>
+      <p class="sub">Tu joues avec 5 villageois contrôlés par l'ordinateur. Un rôle t'est tiré au hasard : villageois, loup-garou, voyante, sorcière ou chasseur. Survis — ou dévore — jusqu'à l'aube.</p>
+      <div class="eyebrow">Difficulté</div>
+      <div class="diff-row" id="diffRow">
+        <button class="diff-btn" data-diff="easy">Facile</button>
+        <button class="diff-btn active" data-diff="normal">Normal</button>
+        <button class="diff-btn" data-diff="hard">Difficile</button>
+      </div>
+      <button class="btn btn-primary" id="btnStart">Commencer la partie</button>
+      <p class="stats-line" id="statsLine"></p>
+      <div class="reveal-list hidden" id="statsByRole"></div>
+      <button class="btn btn-ghost hidden" id="btnResetStats">Réinitialiser l'historique</button>
+      <button class="btn btn-ghost" id="btnGoFriends" style="margin-top:18px;">🧑‍🤝‍🧑 Jouer entre amis</button>
+    </section>
+
+    <!-- MULTIJOUEUR : ACCUEIL (créer / rejoindre) -->
+    <section id="screen-mp-home" class="card hidden">
+      <div class="eyebrow">Entre amis · en ligne</div>
+      <h1 class="hero" style="font-size:30px;">Chacun son<br><em>téléphone</em>.</h1>
+      <p class="sub">Un joueur crée la partie, les autres rejoignent avec le code. Chacun découvre son rôle en secret sur son propre écran — la discussion et le vote se font à voix haute.</p>
+      <input type="text" class="field" id="mpNameInput" placeholder="Ton pseudo" maxlength="16">
+      <div class="mp-error" id="mpHomeError"></div>
+      <button class="btn btn-primary" id="btnMpCreate">Créer une partie</button>
+      <input type="text" class="field code-field" id="mpJoinCodeInput" placeholder="CODE" maxlength="4" style="margin-top:16px;">
+      <button class="btn btn-ghost" id="btnMpJoin">Rejoindre avec un code</button>
+      <button class="btn btn-ghost" id="btnMpBackHome">Retour</button>
+    </section>
+
+    <!-- MULTIJOUEUR : SALON D'ATTENTE -->
+    <section id="screen-mp-lobby" class="card hidden">
+      <div class="eyebrow">Salon d'attente</div>
+      <div class="room-code-display">
+        <div class="code" id="mpRoomCode">----</div>
+        <div class="hint2">Donne ce code à tes amis pour qu'ils rejoignent</div>
+      </div>
+      <div class="mp-players" id="mpLobbyPlayers"></div>
+      <div id="mpHostSettings"></div>
+      <div class="mp-error" id="mpLobbyError"></div>
+      <button class="btn btn-primary hidden" id="btnMpStartGame">Lancer la partie</button>
+      <p class="center-note hidden" id="mpLobbyWaitNote">En attente que l'hôte lance la partie…</p>
+      <button class="btn btn-ghost" id="btnMpLeaveLobby">Quitter le salon</button>
+    </section>
+
+    <!-- MULTIJOUEUR : RÔLE -->
+    <section id="screen-mp-role" class="card hidden">
+      <div class="eyebrow">Ton rôle</div>
+      <div class="role-badge">
+        <div class="role-icon" id="mpRoleIcon">🐺</div>
+        <div class="role-name" id="mpRoleName">Loup-Garou</div>
+        <div class="role-desc" id="mpRoleDesc"></div>
+        <div class="role-desc" id="mpRoleAllies" style="margin-top:10px;"></div>
+      </div>
+      <button class="btn btn-primary" id="btnMpRoleContinue">C'est parti</button>
+    </section>
+
+    <!-- MULTIJOUEUR : ACTION DE NUIT (dynamique selon le rôle) -->
+    <section id="screen-mp-night" class="card hidden">
+      <div class="phase-title" id="mpNightTitle">🌑 Nuit tombée</div>
+      <div class="phase-sub" id="mpNightSub"></div>
+      <div class="villagers" id="mpNightVillagers"></div>
+      <div class="mp-error" id="mpNightNote"></div>
+      <button class="btn btn-primary hidden" id="btnMpNightConfirm">Valider</button>
+      <button class="btn btn-ghost hidden" id="btnMpNightSkip">Ne rien faire</button>
+    </section>
+
+    <!-- MULTIJOUEUR : ATTENTE -->
+    <section id="screen-mp-wait" class="card hidden">
+      <div class="phase-title" id="mpWaitTitle">🌙 En attente</div>
+      <p class="mp-wait-note"><span class="spin">🌘</span><br><span id="mpWaitText">Les autres joueurs agissent encore…</span></p>
+      <button class="btn btn-primary hidden" id="btnMpHostAdvance">Passer à la suite (hôte)</button>
+    </section>
+
+    <!-- MULTIJOUEUR : RÉSULTAT DE LA NUIT -->
+    <section id="screen-mp-morning" class="card hidden">
+      <div class="phase-title">🌅 Le village se réveille</div>
+      <div class="log" id="mpMorningLog"></div>
+      <button class="btn btn-primary hidden" id="btnMpMorningContinue">Passer au vote (hôte)</button>
+      <p class="center-note hidden" id="mpMorningWaitNote">En attente de l'hôte…</p>
+    </section>
+
+    <!-- MULTIJOUEUR : JOUR — VOTE -->
+    <section id="screen-mp-day" class="card hidden">
+      <div class="phase-title">☀️ Débat au village</div>
+      <div class="phase-sub">Discutez à voix haute, puis chacun vote sur son téléphone.</div>
+      <div class="villagers" id="mpDayVillagers"></div>
+      <button class="btn btn-primary" id="btnMpVoteConfirm" disabled>Voter le bannissement</button>
+      <div class="mp-error" id="mpDayNote"></div>
+      <button class="btn btn-ghost hidden" id="btnMpDayReveal">Voir le verdict (hôte)</button>
+    </section>
+
+    <!-- MULTIJOUEUR : VERDICT -->
+    <section id="screen-mp-vote-result" class="card hidden">
+      <div class="phase-title">⚖️ Verdict</div>
+      <div class="log" id="mpVoteLog"></div>
+      <button class="btn btn-primary hidden" id="btnMpVoteResultContinue">Nuit suivante (hôte)</button>
+      <p class="center-note hidden" id="mpVoteResultWaitNote">En attente de l'hôte…</p>
+    </section>
+
+    <!-- MULTIJOUEUR : FIN DE PARTIE -->
+    <section id="screen-mp-end" class="card hidden">
+      <div class="role-badge">
+        <div class="role-icon" id="mpEndIcon">🏆</div>
+        <div class="role-name" id="mpEndTitle">Victoire</div>
+        <div class="role-desc" id="mpEndDesc"></div>
+      </div>
+      <div class="reveal-list" id="mpEndReveal"></div>
+      <button class="btn btn-primary hidden" id="btnMpReplay">Rejouer avec les mêmes joueurs (hôte)</button>
+      <p class="center-note hidden" id="mpEndWaitNote">En attente de l'hôte…</p>
+      <button class="btn btn-ghost" id="btnMpQuit">Quitter</button>
+    </section>
+
+    <!-- ÉCRAN RÈGLES -->
+    <section id="screen-rules" class="card hidden">
+      <div class="eyebrow">Comment jouer</div>
+      <h1 class="hero" style="font-size:28px;">Les rôles</h1>
+      <p class="sub">Chaque nuit, les rôles spéciaux agissent en secret dans l'ordre : loup-garou → voyante → sorcière → (chasseur, si besoin). Le jour, tout le monde débat puis vote pour bannir un suspect. Le village gagne si le loup-garou est éliminé ; le loup gagne s'il ne reste plus qu'un villageois face à lui.</p>
+      <div class="rule-row">
+        <div class="rule-icon">🐺</div>
+        <div>
+          <div class="rule-name wolf">Loup-Garou</div>
+          <div class="rule-desc">Chaque nuit, choisit une victime en secret. Le jour, doit se fondre dans la foule pour ne pas être démasqué.</div>
+        </div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-icon">🔮</div>
+        <div>
+          <div class="rule-name seer">Voyante</div>
+          <div class="rule-desc">Chaque nuit, sonde un joueur pour découvrir s'il est le loup-garou.</div>
+        </div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-icon">🧪</div>
+        <div>
+          <div class="rule-name witch">Sorcière</div>
+          <div class="rule-desc">Possède deux potions à usage unique : sauver la victime du loup, ou empoisonner quelqu'un.</div>
+        </div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-icon">🏹</div>
+        <div>
+          <div class="rule-name hunter">Chasseur</div>
+          <div class="rule-desc">Pas de pouvoir la nuit. Mais s'il meurt — dévoré ou banni — il tire une dernière flèche et emporte quelqu'un avec lui.</div>
+        </div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-icon">🕯️</div>
+        <div>
+          <div class="rule-name villager">Villageois</div>
+          <div class="rule-desc">Pas de pouvoir spécial. Observe, débat et vote pour démasquer le loup-garou.</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="btnRulesClose" style="margin-top:16px;">Retour</button>
+    </section>
+
+    <!-- ÉCRAN 2 : RÉVÉLATION DU RÔLE -->
+    <section id="screen-role" class="card hidden">
+      <div class="eyebrow">Ton rôle</div>
+      <div class="role-badge">
+        <div class="role-icon" id="roleIcon">🐺</div>
+        <div class="role-name" id="roleName">Loup-Garou</div>
+        <div class="role-desc" id="roleDesc"></div>
+      </div>
+      <button class="btn btn-primary" id="btnRoleContinue">C'est parti</button>
+    </section>
+
+    <!-- ÉCRAN 3 : NUIT (le loup choisit) -->
+    <section id="screen-night" class="card hidden">
+      <div class="phase-title" id="nightTitle">🌑 Nuit tombée</div>
+      <div class="phase-sub" id="nightSub">Choisis ta victime en silence…</div>
+      <div class="villagers" id="nightVillagers"></div>
+      <button class="btn btn-primary" id="btnNightConfirm" disabled>Attaquer</button>
+    </section>
+
+    <!-- ÉCRAN 3b : NUIT PASSIVE (villageois, la nuit se déroule seule) -->
+    <section id="screen-night-wait" class="card hidden">
+      <div class="phase-title" id="nightWaitTitle">🌑 Nuit tombée</div>
+      <p class="sub">Tu dors. Quelque part, le loup-garou choisit sa proie…</p>
+      <button class="btn btn-primary" id="btnNightWaitContinue">Voir ce qui s'est passé</button>
+    </section>
+
+    <!-- ÉCRAN 3c : NUIT — VOYANTE -->
+    <section id="screen-seer" class="card hidden">
+      <div class="phase-title">🔮 Vision nocturne</div>
+      <div class="phase-sub">Choisis quelqu'un à sonder cette nuit.</div>
+      <div class="villagers" id="seerVillagers"></div>
+      <div class="log hidden" id="seerResult"></div>
+      <button class="btn btn-primary" id="btnSeerConfirm" disabled>Sonder</button>
+    </section>
+
+    <!-- ÉCRAN 3d : NUIT — SORCIÈRE -->
+    <section id="screen-witch" class="card hidden">
+      <div class="phase-title">🧪 Antre de la sorcière</div>
+      <div class="phase-sub" id="witchVictimText"></div>
+      <button class="btn btn-ghost" id="btnWitchSave">Utiliser la potion de vie</button>
+      <div class="potion-note" id="witchLifeNote"></div>
+      <div class="phase-sub" style="margin-top:16px;">Empoisonner quelqu'un cette nuit ? (facultatif)</div>
+      <div class="villagers" id="witchVillagers"></div>
+      <div class="potion-note" id="witchDeathNote"></div>
+      <button class="btn btn-primary" id="btnWitchConfirm">Continuer</button>
+    </section>
+
+    <!-- ÉCRAN 3e : DERNIÈRE FLÈCHE DU CHASSEUR -->
+    <section id="screen-hunter" class="card hidden">
+      <div class="phase-title">🏹 Dernière flèche</div>
+      <div class="phase-sub">Le chasseur tombe... mais avant de mourir, tu peux entraîner quelqu'un avec toi.</div>
+      <div class="villagers" id="hunterVillagers"></div>
+      <button class="btn btn-primary" id="btnHunterConfirm" disabled>Tirer</button>
+      <button class="btn btn-ghost" id="btnHunterSkip">Ne tirer sur personne</button>
+    </section>
+
+    <!-- ÉCRAN 4 : RÉSULTAT DE LA NUIT -->
+    <section id="screen-morning" class="card hidden">
+      <div class="phase-title">🌅 Le village se réveille</div>
+      <div class="log" id="morningLog"></div>
+      <button class="btn btn-primary" id="btnMorningContinue">Passer au vote</button>
+    </section>
+
+    <!-- ÉCRAN 5 : JOUR — DISCUSSION + VOTE -->
+    <section id="screen-day" class="card hidden">
+      <div class="phase-title" id="dayTitle">☀️ Débat au village</div>
+      <div class="phase-sub">Qui semble suspect ? Vote pour bannir quelqu'un.</div>
+      <div class="log" id="dayLog"></div>
+      <div class="villagers" id="dayVillagers"></div>
+      <button class="btn btn-primary" id="btnVoteConfirm" disabled>Voter le bannissement</button>
+    </section>
+
+    <!-- ÉCRAN 6 : RÉSULTAT DU VOTE -->
+    <section id="screen-vote-result" class="card hidden">
+      <div class="phase-title">⚖️ Verdict</div>
+      <div class="log" id="voteLog"></div>
+      <button class="btn btn-primary" id="btnVoteResultContinue">Continuer</button>
+    </section>
+
+    <!-- ÉCRAN 7 : FIN DE PARTIE -->
+    <section id="screen-end" class="card hidden">
+      <div class="role-badge">
+        <div class="role-icon" id="endIcon">🏆</div>
+        <div class="role-name" id="endTitle">Victoire</div>
+        <div class="role-desc" id="endDesc"></div>
+      </div>
+      <div class="reveal-list" id="endReveal"></div>
+      <button class="btn btn-primary" id="btnReplay">Rejouer</button>
+    </section>
+
+  </main>
+
+  <footer class="hint">Petit jeu solo — chaque partie est différente.</footer>
+</div>
+
+<script>
+(function(){
+  // ---------- Étoiles décoratives ----------
+  const starsEl = document.getElementById('stars');
+  for(let i=0;i<40;i++){
+    const s = document.createElement('div');
+    s.className='star';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*70+'%';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    starsEl.appendChild(s);
+  }
+
+  // ---------- Écrans ----------
+  const screens = {};
+  ['home','rules','role','night','night-wait','seer','witch','hunter','morning','day','vote-result','end',
+   'mp-home','mp-lobby','mp-role','mp-night','mp-wait','mp-morning','mp-day','mp-vote-result','mp-end'].forEach(id=>{
+    screens[id] = document.getElementById('screen-'+id);
+  });
+  function show(id){
+    Object.values(screens).forEach(el=>el.classList.add('hidden'));
+    const target = screens[id];
+    target.classList.remove('hidden');
+    target.classList.remove('entering');
+    // relance l'animation d'entrée à chaque affichage
+    void target.offsetWidth;
+    target.classList.add('entering');
+  }
+
+  const moonPhaseEl = document.getElementById('moonPhase');
+  const vignetteEl = document.getElementById('vignette');
+  function setPhase(isDay){
+    moonPhaseEl.classList.toggle('day', isDay);
+    vignetteEl.classList.toggle('day', isDay);
+    document.body.classList.toggle('day-mode', isDay);
+  }
+
+  // ---------- Ambiance sonore & haptique ----------
+  let soundOn = true;
+  const soundBtn = document.getElementById('btnSoundToggle');
+  soundBtn.addEventListener('click', ()=>{
+    soundOn = !soundOn;
+    soundBtn.textContent = soundOn ? '🔊' : '🔇';
+    savePrefs();
+  });
+
+  // ---------- Difficulté ----------
+  const DIFF_SETTINGS = {
+    easy:   {wolfSmart:0.2,  susMult:0.55},
+    normal: {wolfSmart:0.55, susMult:1},
+    hard:   {wolfSmart:0.85, susMult:1.5}
+  };
+  let difficulty = 'normal';
+  const diffRow = document.getElementById('diffRow');
+  diffRow.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.diff-btn');
+    if(!btn) return;
+    difficulty = btn.dataset.diff;
+    [...diffRow.children].forEach(c=>c.classList.toggle('active', c===btn));
+    savePrefs();
+  });
+  function currentDiff(){ return DIFF_SETTINGS[difficulty] || DIFF_SETTINGS.normal; }
+  let audioCtx = null;
+  function ctx(){
+    if(!soundOn) return null;
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ audioCtx = null; }
+    }
+    if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function tone(freqStart, freqEnd, duration, {type='sine', gainPeak=.15, delay=0} = {}){
+    const c = ctx();
+    if(!c) return;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = type;
+    const t0 = c.currentTime + delay;
+    osc.frequency.setValueAtTime(freqStart, t0);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd,1), t0 + duration);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(gainPeak, t0 + duration*0.15);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+    osc.connect(gain).connect(c.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.05);
+  }
+  function playHowl(){
+    // un hurlement grave qui monte puis redescend
+    tone(180, 520, 0.9, {type:'sawtooth', gainPeak:.05, delay:0});
+    tone(520, 160, 1.1, {type:'sawtooth', gainPeak:.04, delay:0.85});
+  }
+  function playBell(){
+    // cloche du matin : deux harmoniques claires
+    tone(880, 700, 0.6, {type:'sine', gainPeak:.07});
+    tone(1320, 1000, 0.6, {type:'sine', gainPeak:.04, delay:0.05});
+  }
+  function playThud(){
+    tone(140, 50, 0.35, {type:'triangle', gainPeak:.12});
+  }
+  function playChime(success){
+    if(success){
+      [523,659,784,1047].forEach((f,i)=>tone(f,f,0.5,{type:'sine', gainPeak:.06, delay:i*0.12}));
+    } else {
+      [392,349,293].forEach((f,i)=>tone(f,f*0.7,0.6,{type:'sawtooth', gainPeak:.06, delay:i*0.15}));
+    }
+  }
+  function buzz(pattern){
+    if(navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} }
+  }
+
+  // ---------- État du jeu ----------
+  const BOT_NAMES = ['Margot','Léon','Élise','Hugo','Inès','Théo','Alix','Nathan'];
+  const AVATARS = ['🧑‍🌾','👩‍🍳','🧑‍🎨','👨‍🔧','👩‍⚕️','🧑‍🏫','👨‍🌾','👩‍🎤'];
+
+  let players = [];   // {id, name, avatar, alive, role, isYou, usedLife, usedDeath}
+  let dayCount = 1;
+  let selectedNightTarget = null;
+  let selectedVoteTarget = null;
+  let selectedSeerTarget = null;
+  let seerStage = 'select'; // 'select' -> 'result'
+  let selectedWitchKillTarget = null;
+  let witchSavePending = false;
+  let nightState = {};
+
+  const ROLE_LABEL = {wolf:'le loup-garou', seer:'la voyante', witch:'la sorcière', hunter:'le chasseur', villager:'un simple villageois'};
+  const ROLE_ICON = {wolf:'🐺', seer:'🔮', witch:'🧪', hunter:'🏹', villager:'🕯️'};
+  const DEATH_CAUSE_LABEL = {wolf:'dévoré par le loup', poison:'empoisonné', hunter:'emporté par le chasseur', vote:'banni par le village'};
+
+  // --- Système de soupçons (fait "réfléchir" les bots) ---
+  let suspicion = {};
+  let botSeerKnownWolfId = null;
+  let dayWolfDeflectionTarget = null;
+
+  function addSuspicion(id, amount){
+    suspicion[id] = (suspicion[id]||0) + amount;
+  }
+  function decaySuspicion(){
+    Object.keys(suspicion).forEach(id=>{ suspicion[id] = (suspicion[id]||0) * 0.65; });
+  }
+  function mostSuspected(excludeId){
+    const candidates = alivePlayers().filter(p=>p.id!==excludeId);
+    if(!candidates.length) return null;
+    let best = candidates[0];
+    candidates.forEach(p=>{ if((suspicion[p.id]||0) > (suspicion[best.id]||0)) best = p; });
+    return best;
+  }
+  function weightedPick(candidates, weightFn){
+    const weights = candidates.map(weightFn);
+    const total = weights.reduce((a,b)=>a+b,0);
+    if(total <= 0) return candidates[Math.floor(Math.random()*candidates.length)];
+    let r = Math.random()*total;
+    for(let i=0;i<candidates.length;i++){
+      r -= weights[i];
+      if(r <= 0) return candidates[i];
+    }
+    return candidates[candidates.length-1];
+  }
+
+  // --- Dernière flèche du chasseur ---
+  let hunterRevengeCallback = null;
+  let selectedHunterTarget = null;
+
+  function pickHunterRevengeTarget(hunterPlayer){
+    const targets = players.filter(p=>p.alive && p.id!==hunterPlayer.id);
+    if(!targets.length) return null;
+    // Le chasseur-bot vise plutôt un joueur déjà suspecté
+    return weightedPick(targets, p => (suspicion[p.id]||0) + 0.5);
+  }
+
+  function showHunterScreen(hunterPlayer, onDone){
+    hunterRevengeCallback = onDone;
+    selectedHunterTarget = null;
+    const grid = document.getElementById('hunterVillagers');
+    renderVillagerGrid(grid, {
+      selectable:true,
+      excludeId:hunterPlayer.id,
+      onSelect:(id, el, container)=>{
+        selectedHunterTarget = id;
+        [...container.children].forEach(c=>c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('btnHunterConfirm').disabled = false;
+      }
+    });
+    document.getElementById('btnHunterConfirm').disabled = true;
+    show('hunter');
+  }
+
+  document.getElementById('btnHunterConfirm').addEventListener('click', ()=>{
+    if(!selectedHunterTarget) return;
+    const target = players.find(p=>p.id===selectedHunterTarget);
+    if(target && target.alive){ target.alive = false; target.deathCause = 'hunter'; }
+    const cb = hunterRevengeCallback;
+    hunterRevengeCallback = null;
+    if(cb) cb(target && !target.alive ? target : null);
+  });
+
+  document.getElementById('btnHunterSkip').addEventListener('click', ()=>{
+    const cb = hunterRevengeCallback;
+    hunterRevengeCallback = null;
+    if(cb) cb(null);
+  });
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function newGame(){
+    dayCount = 1;
+    const names = shuffle(BOT_NAMES).slice(0,5);
+    const avatars = shuffle(AVATARS).slice(0,5);
+    players = [{id:'you', name:'Toi', avatar:'🙂', alive:true, role:'villager', isYou:true, usedLife:false, usedDeath:false, deathCause:null}];
+    names.forEach((n,i)=>{
+      players.push({id:'bot'+i, name:n, avatar:avatars[i], alive:true, role:'villager', isYou:false, usedLife:false, usedDeath:false, deathCause:null});
+    });
+    // Répartition des rôles : 1 loup-garou, 1 voyante, 1 sorcière, 1 chasseur, 2 villageois
+    const roles = shuffle(['wolf','seer','witch','hunter','villager','villager']);
+    players.forEach((p,i)=>{ p.role = roles[i]; });
+
+    suspicion = {};
+    players.forEach(p=>{ suspicion[p.id] = 0; });
+    botSeerKnownWolfId = null;
+    dayWolfDeflectionTarget = null;
+    youDeathCause = null;
+  }
+
+  function alivePlayers(){ return players.filter(p=>p.alive); }
+  function you(){ return players.find(p=>p.isYou); }
+  function aliveBots(){ return players.filter(p=>p.alive && !p.isYou); }
+
+  // ---------- Écran rôle ----------
+  function showRole(){
+    const y = you();
+    const icon = document.getElementById('roleIcon');
+    const name = document.getElementById('roleName');
+    const desc = document.getElementById('roleDesc');
+    icon.classList.remove('wolf','villager','seer','witch','hunter');
+    name.classList.remove('wolf','villager','seer','witch','hunter');
+    icon.classList.add(y.role);
+    name.classList.add(y.role);
+    if(y.role==='wolf'){
+      icon.textContent = '🐺';
+      name.textContent = 'Loup-Garou';
+      desc.textContent = 'Chaque nuit, choisis une victime en secret. Le jour, fonds-toi dans la foule pour ne pas être démasqué.';
+    } else if(y.role==='seer'){
+      icon.textContent = '🔮';
+      name.textContent = 'Voyante';
+      desc.textContent = 'Chaque nuit, sonde un joueur pour découvrir s\'il est le loup-garou. Utilise ces indices pour guider le vote du village.';
+    } else if(y.role==='witch'){
+      icon.textContent = '🧪';
+      name.textContent = 'Sorcière';
+      desc.textContent = 'Tu possèdes deux potions à usage unique : une pour sauver la victime du loup-garou, une pour empoisonner quelqu\'un. Utilise-les avec sagesse.';
+    } else if(y.role==='hunter'){
+      icon.textContent = '🏹';
+      name.textContent = 'Chasseur';
+      desc.textContent = 'Tu n\'as pas de pouvoir la nuit. Mais si tu meurs — dévoré ou banni — tu peux tirer une dernière flèche et emporter quelqu\'un avec toi.';
+    } else {
+      icon.textContent = '🕯️';
+      name.textContent = 'Villageois';
+      desc.textContent = 'Tu n\'as pas de pouvoir spécial. Observe, débats et vote pour démasquer le loup-garou avant qu\'il ne vous décime.';
+    }
+    show('role');
+  }
+
+  // ---------- Rendu d'une grille de joueurs ----------
+  function renderVillagerGrid(container, {selectable=false, excludeYou=false, excludeId=null, onSelect=null, selectedId=null} = {}){
+    container.innerHTML = '';
+    players.forEach(p=>{
+      if(excludeYou && p.isYou) return;
+      if(excludeId && p.id === excludeId) return;
+      const div = document.createElement('div');
+      div.className = 'villager';
+      if(!p.alive) div.classList.add('dead');
+      if(p.isYou) div.classList.add('you');
+      if(selectable && p.alive) div.classList.add('selectable');
+      if(selectedId === p.id) div.classList.add('selected');
+
+      const avatar = document.createElement('span');
+      avatar.className = 'avatar';
+      avatar.textContent = p.alive ? p.avatar : '💀';
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = p.isYou ? 'Toi' : p.name;
+      const status = document.createElement('div');
+      status.className = 'status';
+      status.textContent = p.alive ? (p.isYou ? '' : 'vivant') : 'éliminé';
+
+      div.appendChild(avatar);
+      div.appendChild(name);
+      div.appendChild(status);
+
+      if(selectable && p.alive && onSelect){
+        div.addEventListener('click', ()=>onSelect(p.id, div, container));
+      }
+      container.appendChild(div);
+    });
+  }
+
+  // ---------- Phase de nuit ----------
+  function startNight(){
+    setPhase(false);
+    playHowl();
+    nightState = {victimId:null, savedByWitch:false, witchKillId:null};
+    selectedNightTarget = null;
+    selectedSeerTarget = null;
+    seerStage = 'select';
+    selectedWitchKillTarget = null;
+    witchSavePending = false;
+    document.getElementById('nightTitle').textContent = `🌑 Nuit ${dayCount}`;
+    document.getElementById('nightWaitTitle').textContent = `🌑 Nuit ${dayCount}`;
+    const y = you();
+    if(y.alive && y.role === 'villager'){
+      show('night-wait');
+    } else {
+      proceedWolfStep();
+    }
+  }
+
+  document.getElementById('btnNightWaitContinue').addEventListener('click', ()=>{
+    proceedWolfStep();
+  });
+
+  // --- Étape 1 : le loup-garou ---
+  function proceedWolfStep(){
+    const y = you();
+    if(y.alive && y.role === 'wolf'){
+      const grid = document.getElementById('nightVillagers');
+      renderVillagerGrid(grid, {
+        selectable:true,
+        excludeYou:true,
+        onSelect:(id, el, container)=>{
+          selectedNightTarget = id;
+          [...container.children].forEach(c=>c.classList.remove('selected'));
+          el.classList.add('selected');
+          document.getElementById('btnNightConfirm').disabled = false;
+        }
+      });
+      document.getElementById('btnNightConfirm').disabled = true;
+      document.getElementById('nightSub').textContent = 'Choisis ta victime en silence…';
+      show('night');
+    } else {
+      autoWolfPick();
+      proceedSeerStep();
+    }
+  }
+
+  function autoWolfPick(){
+    const wolf = players.find(p=>p.role==='wolf' && p.alive);
+    if(wolf){
+      const targets = players.filter(p=>p.alive && p.id!==wolf.id);
+      if(targets.length){
+        // Un loup rusé élimine plutôt les joueurs qui inspirent confiance (selon la difficulté)
+        const diff = currentDiff();
+        const target = Math.random() < diff.wolfSmart
+          ? weightedPick(targets, p => 1/((suspicion[p.id]||0) + 1))
+          : targets[Math.floor(Math.random()*targets.length)];
+        nightState.victimId = target.id;
+      }
+    }
+  }
+
+  document.getElementById('btnNightConfirm').addEventListener('click', ()=>{
+    if(!selectedNightTarget) return;
+    nightState.victimId = selectedNightTarget;
+    proceedSeerStep();
+  });
+
+  // --- Étape 2 : la voyante ---
+  function proceedSeerStep(){
+    const y = you();
+    if(y.alive && y.role === 'seer'){
+      seerStage = 'select';
+      selectedSeerTarget = null;
+      const grid = document.getElementById('seerVillagers');
+      renderVillagerGrid(grid, {
+        selectable:true,
+        excludeYou:true,
+        onSelect:(id, el, container)=>{
+          if(seerStage !== 'select') return;
+          selectedSeerTarget = id;
+          [...container.children].forEach(c=>c.classList.remove('selected'));
+          el.classList.add('selected');
+          document.getElementById('btnSeerConfirm').disabled = false;
+        }
+      });
+      const resultBox = document.getElementById('seerResult');
+      resultBox.classList.add('hidden');
+      resultBox.innerHTML = '';
+      const btn = document.getElementById('btnSeerConfirm');
+      btn.textContent = 'Sonder';
+      btn.disabled = true;
+      show('seer');
+    } else {
+      autoSeerProbe();
+      proceedWitchStep();
+    }
+  }
+
+  function autoSeerProbe(){
+    const seer = players.find(p=>p.role==='seer' && p.alive && !p.isYou);
+    if(!seer || botSeerKnownWolfId) return;
+    const targets = players.filter(p=>p.alive && p.id!==seer.id);
+    if(!targets.length) return;
+    const target = targets[Math.floor(Math.random()*targets.length)];
+    if(target.role === 'wolf'){
+      botSeerKnownWolfId = target.id;
+    }
+  }
+
+  document.getElementById('btnSeerConfirm').addEventListener('click', ()=>{
+    if(seerStage === 'select'){
+      if(!selectedSeerTarget) return;
+      const target = players.find(p=>p.id===selectedSeerTarget);
+      const resultBox = document.getElementById('seerResult');
+      resultBox.classList.remove('hidden');
+      const p = document.createElement('p');
+      if(target.role === 'wolf'){
+        p.innerHTML = `${target.name} dégage une aura sombre… c'est <span class="tag wolf">le loup-garou</span> !`;
+      } else {
+        p.innerHTML = `${target.name} semble innocent${target.isYou?'':''} — pas de trace de malédiction.`;
+      }
+      resultBox.innerHTML = '';
+      resultBox.appendChild(p);
+      seerStage = 'result';
+      document.getElementById('btnSeerConfirm').textContent = 'Continuer la nuit';
+    } else {
+      proceedWitchStep();
+    }
+  });
+
+  // --- Étape 3 : la sorcière ---
+  function proceedWitchStep(){
+    const y = you();
+    if(y.alive && y.role === 'witch'){
+      const victimText = document.getElementById('witchVictimText');
+      const saveBtn = document.getElementById('btnWitchSave');
+      const lifeNote = document.getElementById('witchLifeNote');
+      const deathNote = document.getElementById('witchDeathNote');
+      const victim = nightState.victimId ? players.find(p=>p.id===nightState.victimId) : null;
+
+      if(victim){
+        victimText.textContent = `Cette nuit, ${victim.isYou ? 'toi-même' : victim.name} va être attaqué${victim.isYou?'':''} par le loup-garou.`;
+      } else {
+        victimText.textContent = "Étrangement, le loup-garou n'a visé personne cette nuit.";
+      }
+
+      witchSavePending = false;
+      saveBtn.classList.remove('selected');
+      if(!victim || y.usedLife){
+        saveBtn.disabled = true;
+        lifeNote.textContent = y.usedLife ? 'Potion de vie déjà utilisée.' : 'Personne à sauver cette nuit.';
+      } else {
+        saveBtn.disabled = false;
+        lifeNote.textContent = '';
+      }
+
+      selectedWitchKillTarget = null;
+      const grid = document.getElementById('witchVillagers');
+      if(y.usedDeath){
+        grid.innerHTML = '';
+        deathNote.textContent = 'Potion de mort déjà utilisée.';
+      } else {
+        deathNote.textContent = '';
+        renderVillagerGrid(grid, {
+          selectable:true,
+          excludeYou:true,
+          onSelect:(id, el, container)=>{
+            if(selectedWitchKillTarget === id){
+              selectedWitchKillTarget = null;
+              el.classList.remove('selected');
+            } else {
+              selectedWitchKillTarget = id;
+              [...container.children].forEach(c=>c.classList.remove('selected'));
+              el.classList.add('selected');
+            }
+          }
+        });
+      }
+      show('witch');
+    } else {
+      autoWitchDecision();
+      resolveNight();
+    }
+  }
+
+  document.getElementById('btnWitchSave').addEventListener('click', function(){
+    if(this.disabled) return;
+    witchSavePending = !witchSavePending;
+    this.classList.toggle('selected', witchSavePending);
+  });
+
+  document.getElementById('btnWitchConfirm').addEventListener('click', ()=>{
+    const y = you();
+    if(witchSavePending && nightState.victimId && !y.usedLife){
+      nightState.savedByWitch = true;
+      y.usedLife = true;
+    }
+    if(selectedWitchKillTarget && !y.usedDeath){
+      nightState.witchKillId = selectedWitchKillTarget;
+      y.usedDeath = true;
+    }
+    resolveNight();
+  });
+
+  function autoWitchDecision(){
+    const witch = players.find(p=>p.role==='witch' && p.alive);
+    if(!witch) return;
+    if(nightState.victimId && !witch.usedLife){
+      const chance = witch.id === nightState.victimId ? 0.85 : 0.4;
+      if(Math.random() < chance){
+        nightState.savedByWitch = true;
+        witch.usedLife = true;
+      }
+    }
+    if(!witch.usedDeath && Math.random() < 0.18){
+      const targets = players.filter(p=>p.alive && p.id!==witch.id && p.id!==nightState.victimId);
+      if(targets.length){
+        nightState.witchKillId = targets[Math.floor(Math.random()*targets.length)].id;
+        witch.usedDeath = true;
+      }
+    }
+  }
+
+  // --- Résolution finale de la nuit ---
+  let lastVictimName = null;
+  let youDeathCause = null; // 'wolf' | 'poison' | 'hunter' | 'vote' | null
+  function resolveNight(){
+    const deaths = [];
+
+    if(nightState.victimId && !nightState.savedByWitch){
+      const victim = players.find(p=>p.id===nightState.victimId);
+      if(victim && victim.alive){
+        victim.alive = false;
+        victim.deathCause = 'wolf';
+        deaths.push({player:victim, cause:'wolf'});
+      }
+    }
+    if(nightState.witchKillId){
+      const poisoned = players.find(p=>p.id===nightState.witchKillId);
+      if(poisoned && poisoned.alive){
+        poisoned.alive = false;
+        poisoned.deathCause = 'poison';
+        deaths.push({player:poisoned, cause:'poison'});
+      }
+    }
+
+    // Un chasseur qui meurt cette nuit peut emporter quelqu'un avec lui
+    const fallenHunter = deaths.map(d=>d.player).find(p=>p.role==='hunter');
+    if(fallenHunter && fallenHunter.isYou){
+      showHunterScreen(fallenHunter, (revengeTarget)=>{
+        if(revengeTarget) deaths.push({player:revengeTarget, cause:'hunter'});
+        finishNightResolution(deaths);
+      });
+    } else {
+      if(fallenHunter){
+        const revengeTarget = pickHunterRevengeTarget(fallenHunter);
+        if(revengeTarget){
+          revengeTarget.alive = false;
+          revengeTarget.deathCause = 'hunter';
+          deaths.push({player:revengeTarget, cause:'hunter'});
+        }
+      }
+      finishNightResolution(deaths);
+    }
+  }
+
+  function finishNightResolution(deaths){
+    lastVictimName = null;
+    youDeathCause = null;
+    const youDeath = deaths.find(d=>d.player.isYou);
+    if(youDeath) youDeathCause = youDeath.cause;
+    const log = document.getElementById('morningLog');
+    log.innerHTML = '';
+
+    if(deaths.length){
+      lastVictimName = deaths.map(d=>d.player.isYou?'Toi':d.player.name).join(' et ');
+      deaths.forEach(d=>{
+        const p = document.createElement('p');
+        if(d.cause === 'poison'){
+          p.innerHTML = `<span class="tag wolf">${d.player.isYou?'Toi':d.player.name}</span> a été retrouvé${d.player.isYou?'':''} sans vie — empoisonné${d.player.isYou?'':''} pendant la nuit.`;
+        } else if(d.cause === 'hunter'){
+          p.innerHTML = `Dans un dernier sursaut, le chasseur a entraîné <span class="tag wolf">${d.player.isYou?'toi':d.player.name}</span> avec lui.`;
+        } else {
+          p.innerHTML = `Cette nuit, <span class="tag wolf">${d.player.isYou?'toi-même':d.player.name}</span> a été retrouvé${d.player.isYou?'':''}${'\u00A0'}sans vie à l'orée du village. Le loup-garou a encore frappé.`;
+        }
+        log.appendChild(p);
+      });
+      playThud();
+      buzz([40,60,40]);
+    } else if(nightState.victimId && nightState.savedByWitch){
+      const p = document.createElement('p');
+      p.textContent = "La sorcière a sauvé la victime du loup-garou in extremis !";
+      log.appendChild(p);
+    } else {
+      const p = document.createElement('p');
+      p.textContent = "Étrangement, personne n'a été attaqué cette nuit.";
+      log.appendChild(p);
+    }
+
+    show('morning');
+    if(deaths.length){
+      const card = screens['morning'];
+      card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    }
+  }
+
+  document.getElementById('btnMorningContinue').addEventListener('click', ()=>{
+    const y = you();
+    if(!y.alive){
+      let msg = "Tu as été dévoré pendant la nuit. Le village continuera sans toi, mais ta partie s'arrête ici.";
+      if(youDeathCause === 'poison') msg = "Tu as été empoisonné par la sorcière pendant la nuit. Ta partie s'arrête ici.";
+      else if(youDeathCause === 'hunter') msg = "Le chasseur, en tombant, t'a entraîné avec lui dans la mort. Ta partie s'arrête ici.";
+      endGame(false, msg);
+      return;
+    }
+    if(checkWinCondition()) return;
+    setPhase(true);
+    playBell();
+    startDay();
+  });
+
+  // ---------- Phase de jour ----------
+  const ACCUSE_LINES = [
+    "Je trouve que {name} agit bizarrement depuis hier.",
+    "{name} évite les regards, ça m'intrigue.",
+    "Il y a quelque chose qui cloche chez {name}.",
+    "Je ne fais pas confiance à {name}, désolé.",
+    "{name} a été bien trop silencieux à mon goût."
+  ];
+  const STRONG_ACCUSE_LINES = [
+    "Je suis presque sûr que {name} est le loup-garou !",
+    "Écoutez-moi bien : {name} cache quelque chose de grave.",
+    "J'ai un pressentiment très précis sur {name}, méfiez-vous."
+  ];
+  const NEUTRAL_LINES = [
+    "On n'a aucune preuve, mais il faut bien voter pour quelqu'un.",
+    "Restons calmes et réfléchissons avant de voter.",
+    "Je vote avec la majorité, on est plus forts ensemble.",
+    "Quelqu'un a-t-il remarqué un comportement étrange hier soir ?"
+  ];
+
+  function displayName(p){ return p.isYou ? 'toi' : p.name; }
+
+  function computeWolfDeflection(){
+    dayWolfDeflectionTarget = null;
+    const wolf = players.find(p=>p.role==='wolf' && p.alive && !p.isYou);
+    if(!wolf) return;
+    const targets = players.filter(p=>p.alive && p.id!==wolf.id);
+    if(targets.length){
+      dayWolfDeflectionTarget = targets[Math.floor(Math.random()*targets.length)].id;
+      addSuspicion(dayWolfDeflectionTarget, 2);
+    }
+  }
+
+  function pickBotLine(bot){
+    // La voyante-bot qui connaît le loup l'accuse ouvertement
+    if(bot.role === 'seer' && botSeerKnownWolfId){
+      const target = players.find(p=>p.id===botSeerKnownWolfId && p.alive);
+      if(target){
+        addSuspicion(target.id, 4);
+        const line = STRONG_ACCUSE_LINES[Math.floor(Math.random()*STRONG_ACCUSE_LINES.length)];
+        return line.replace('{name}', displayName(target));
+      }
+    }
+    // Le loup-bot détourne les soupçons vers un innocent
+    if(bot.role === 'wolf' && dayWolfDeflectionTarget){
+      const target = players.find(p=>p.id===dayWolfDeflectionTarget && p.alive);
+      if(target){
+        const line = ACCUSE_LINES[Math.floor(Math.random()*ACCUSE_LINES.length)];
+        return line.replace('{name}', displayName(target));
+      }
+    }
+    // Comportement standard : suit la rumeur ou lance un soupçon
+    const roll = Math.random();
+    if(roll < 0.55){
+      const target = mostSuspected(bot.id);
+      if(target && (suspicion[target.id]||0) > 0){
+        addSuspicion(target.id, 1.2);
+        const line = ACCUSE_LINES[Math.floor(Math.random()*ACCUSE_LINES.length)];
+        return line.replace('{name}', displayName(target));
+      }
+    }
+    if(roll < 0.8){
+      const pool = alivePlayers().filter(p=>p.id!==bot.id);
+      if(pool.length){
+        const target = pool[Math.floor(Math.random()*pool.length)];
+        addSuspicion(target.id, 0.6);
+        const line = ACCUSE_LINES[Math.floor(Math.random()*ACCUSE_LINES.length)];
+        return line.replace('{name}', displayName(target));
+      }
+    }
+    return NEUTRAL_LINES[Math.floor(Math.random()*NEUTRAL_LINES.length)];
+  }
+
+  function startDay(){
+    selectedVoteTarget = null;
+    decaySuspicion();
+    computeWolfDeflection();
+    document.getElementById('dayTitle').textContent = `☀️ Jour ${dayCount}`;
+    const log = document.getElementById('dayLog');
+    log.innerHTML = '';
+    if(lastVictimName){
+      const p = document.createElement('p');
+      p.textContent = `Le village pleure la perte de ${lastVictimName}.`;
+      log.appendChild(p);
+    }
+    // quelques répliques de bots, désormais liées aux soupçons du moment
+    const speakers = shuffle(aliveBots()).slice(0, Math.min(3, aliveBots().length));
+    speakers.forEach(bot=>{
+      const line = pickBotLine(bot);
+      const p = document.createElement('p');
+      p.innerHTML = `<span class="tag">${bot.name}</span> — ${line}`;
+      log.appendChild(p);
+    });
+
+    const grid = document.getElementById('dayVillagers');
+    renderVillagerGrid(grid, {
+      selectable:true,
+      excludeYou:false,
+      onSelect:(id, el, container)=>{
+        selectedVoteTarget = id;
+        [...container.children].forEach(c=>c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('btnVoteConfirm').disabled = false;
+      }
+    });
+    document.getElementById('btnVoteConfirm').disabled = true;
+    show('day');
+  }
+
+  document.getElementById('btnVoteConfirm').addEventListener('click', ()=>{
+    if(!selectedVoteTarget) return;
+    resolveVote();
+  });
+
+  function resolveVote(){
+    // votes des bots : pondérés par les soupçons accumulés au fil de la partie
+    const votes = {};
+    function addVote(id){ votes[id] = (votes[id]||0)+1; }
+    addVote(selectedVoteTarget); // ton vote
+
+    aliveBots().forEach(bot=>{
+      const targets = alivePlayers().filter(p=>p.id!==bot.id);
+      const choice = weightedPick(targets, p => (suspicion[p.id]||0)*currentDiff().susMult + 1);
+      addVote(choice.id);
+    });
+
+    // trouver le/les plus votés
+    let max = 0;
+    Object.values(votes).forEach(v=>{ if(v>max) max=v; });
+    const topIds = Object.keys(votes).filter(id=>votes[id]===max);
+    const eliminatedId = topIds[Math.floor(Math.random()*topIds.length)];
+    const eliminated = players.find(p=>p.id===eliminatedId);
+    eliminated.alive = false;
+    eliminated.deathCause = 'vote';
+
+    // les rescapés du vote restent des suspects pour le lendemain
+    Object.keys(votes).forEach(id=>{
+      if(id !== eliminatedId) addSuspicion(id, votes[id]*0.6);
+    });
+
+    const voteCount = votes[eliminatedId];
+
+    if(eliminated.role === 'hunter' && eliminated.isYou){
+      showHunterScreen(eliminated, (revengeTarget)=>{
+        finishVoteResolution(eliminated, voteCount, revengeTarget);
+      });
+    } else {
+      let revengeTarget = null;
+      if(eliminated.role === 'hunter'){
+        revengeTarget = pickHunterRevengeTarget(eliminated);
+        if(revengeTarget){ revengeTarget.alive = false; revengeTarget.deathCause = 'hunter'; }
+      }
+      finishVoteResolution(eliminated, voteCount, revengeTarget);
+    }
+  }
+
+  function finishVoteResolution(eliminated, voteCount, revengeTarget){
+    if(eliminated.isYou) youDeathCause = 'vote';
+    else if(revengeTarget && revengeTarget.isYou) youDeathCause = 'hunter';
+    const log = document.getElementById('voteLog');
+    log.innerHTML = '';
+    const p1 = document.createElement('p');
+    p1.innerHTML = `Le village bannit <span class="tag">${eliminated.isYou?'Toi':eliminated.name}</span> (${voteCount} voix).`;
+    log.appendChild(p1);
+    const p2 = document.createElement('p');
+    if(eliminated.role === 'wolf'){
+      p2.innerHTML = `Sous la capuche… un <span class="tag wolf">loup-garou</span> ! Le village respire enfin.`;
+    } else {
+      p2.textContent = `C'était en réalité ${ROLE_LABEL[eliminated.role]}, un membre innocent du village.`;
+    }
+    log.appendChild(p2);
+    if(revengeTarget){
+      const p3 = document.createElement('p');
+      p3.innerHTML = `Dans un dernier sursaut, le chasseur tire sa flèche et emporte <span class="tag wolf">${revengeTarget.isYou?'toi':revengeTarget.name}</span> avec lui.`;
+      log.appendChild(p3);
+    }
+
+    show('vote-result');
+    playThud();
+    buzz(eliminated.role === 'wolf' ? [50,50,50,50,120] : [60]);
+    const card = screens['vote-result'];
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+  }
+
+  document.getElementById('btnVoteResultContinue').addEventListener('click', ()=>{
+    const y = you();
+    if(!y.alive){
+      let msg;
+      if(youDeathCause === 'hunter'){
+        msg = "Le chasseur banni t'a entraîné avec lui d'une dernière flèche. Ta partie s'arrête ici.";
+      } else {
+        msg = y.role === 'wolf' ? "Tu as été démasqué et banni. Le village l'emporte." : "Tu as été banni par erreur. Ta partie s'arrête ici.";
+      }
+      endGame(false, msg);
+      return;
+    }
+    if(checkWinCondition()) return;
+    dayCount++;
+    startNight();
+  });
+
+  // ---------- Conditions de victoire ----------
+  function checkWinCondition(){
+    const alive = alivePlayers();
+    const wolfAlive = alive.some(p=>p.role==='wolf');
+    const villagersAlive = alive.filter(p=>p.role!=='wolf').length;
+
+    if(!wolfAlive){
+      const y = you();
+      endGame(y.role !== 'wolf', y.role === 'wolf' ? "Le loup-garou (toi) a été éliminé. Le village triomphe." : "Le loup-garou a été éliminé. Le village triomphe — bien joué !");
+      return true;
+    }
+    if(villagersAlive <= 1){ // le loup égale ou dépasse le reste
+      const y = you();
+      endGame(y.role === 'wolf', y.role === 'wolf' ? "Il ne reste plus assez de villageois pour t'arrêter. Le loup-garou (toi) a gagné !" : "Le loup-garou a pris le dessus sur le village. Défaite…");
+      return true;
+    }
+    return false;
+  }
+
+  function endGame(playerWins, message){
+    const icon = document.getElementById('endIcon');
+    const title = document.getElementById('endTitle');
+    const desc = document.getElementById('endDesc');
+    icon.classList.remove('wolf','villager');
+    title.classList.remove('wolf','villager');
+    if(playerWins){
+      icon.textContent = '🏆';
+      title.textContent = 'Victoire';
+      title.classList.add('villager');
+    } else {
+      icon.textContent = '💀';
+      title.textContent = 'Défaite';
+      title.classList.add('wolf');
+    }
+    desc.textContent = message;
+    renderRoleReveal();
+    show('end');
+    playChime(playerWins);
+    buzz(playerWins ? [40,40,40,40,40,40,150] : [200,80,200]);
+    stats.games++;
+    if(playerWins) stats.wins++; else stats.losses++;
+    const yourRole = you().role;
+    if(!stats.byRole[yourRole]) stats.byRole[yourRole] = {games:0, wins:0};
+    stats.byRole[yourRole].games++;
+    if(playerWins) stats.byRole[yourRole].wins++;
+    renderStats();
+    saveStats();
+  }
+
+  function renderRoleReveal(){
+    const el = document.getElementById('endReveal');
+    if(!el) return;
+    el.innerHTML = '';
+    players.forEach(p=>{
+      const row = document.createElement('div');
+      row.className = 'reveal-row' + (p.alive ? '' : ' dead');
+      const avatar = document.createElement('span');
+      avatar.className = 'avatar';
+      avatar.textContent = p.alive ? p.avatar : '💀';
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = p.isYou ? 'Toi' : p.name;
+      const role = document.createElement('div');
+      role.className = 'role ' + p.role;
+      let roleText = ROLE_ICON[p.role] + ' ' + ROLE_LABEL[p.role].replace(/^(le |la |un )/,'');
+      if(!p.alive && p.deathCause && DEATH_CAUSE_LABEL[p.deathCause]){
+        roleText += ' · ' + DEATH_CAUSE_LABEL[p.deathCause];
+      }
+      role.textContent = roleText;
+      row.appendChild(avatar);
+      row.appendChild(name);
+      row.appendChild(role);
+      el.appendChild(row);
+    });
+  }
+
+  // ---------- Historique des parties ----------
+  function emptyByRole(){
+    return {wolf:{games:0,wins:0}, seer:{games:0,wins:0}, witch:{games:0,wins:0}, hunter:{games:0,wins:0}, villager:{games:0,wins:0}};
+  }
+  let stats = {games:0, wins:0, losses:0, byRole:emptyByRole()};
+
+  function renderStats(){
+    const el = document.getElementById('statsLine');
+    const resetBtn = document.getElementById('btnResetStats');
+    const byRoleEl = document.getElementById('statsByRole');
+    if(!el) return;
+    if(stats.games === 0){
+      el.textContent = "Aucune partie jouée pour l'instant.";
+      resetBtn.classList.add('hidden');
+      if(byRoleEl){ byRoleEl.classList.add('hidden'); byRoleEl.innerHTML = ''; }
+    } else {
+      const s = stats.games > 1 ? 's' : '';
+      const sw = stats.wins > 1 ? 's' : '';
+      const sl = stats.losses > 1 ? 's' : '';
+      el.textContent = `${stats.games} partie${s} jouée${s} · ${stats.wins} victoire${sw} · ${stats.losses} défaite${sl}`;
+      resetBtn.classList.remove('hidden');
+      if(byRoleEl){
+        byRoleEl.innerHTML = '';
+        ['wolf','seer','witch','hunter','villager'].forEach(role=>{
+          const r = stats.byRole[role];
+          if(!r || r.games === 0) return;
+          const row = document.createElement('div');
+          row.className = 'reveal-row';
+          const icon = document.createElement('span');
+          icon.className = 'avatar';
+          icon.textContent = ROLE_ICON[role];
+          const name = document.createElement('div');
+          name.className = 'name';
+          name.textContent = ROLE_LABEL[role].replace(/^(le |la |un )/,'');
+          const roleEl = document.createElement('div');
+          roleEl.className = 'role ' + role;
+          roleEl.textContent = `${r.wins}/${r.games} victoire${r.wins>1?'s':''}`;
+          row.appendChild(icon);
+          row.appendChild(name);
+          row.appendChild(roleEl);
+          byRoleEl.appendChild(row);
+        });
+        byRoleEl.classList.toggle('hidden', byRoleEl.children.length === 0);
+      }
+    }
+  }
+
+  async function loadStats(){
+    try{
+      const res = await window.storage.get('stats', false);
+      if(res && res.value) stats = JSON.parse(res.value);
+      if(!stats.byRole) stats.byRole = emptyByRole();
+    }catch(e){ /* premier lancement, ou stockage indisponible : on repart de zéro */ }
+    renderStats();
+  }
+
+  async function saveStats(){
+    try{ await window.storage.set('stats', JSON.stringify(stats), false); }
+    catch(e){ /* stockage indisponible : l'historique ne survivra pas à cette session */ }
+  }
+
+  async function loadPrefs(){
+    try{
+      const res = await window.storage.get('prefs', false);
+      if(res && res.value){
+        const prefs = JSON.parse(res.value);
+        if(typeof prefs.sound === 'boolean'){
+          soundOn = prefs.sound;
+          soundBtn.textContent = soundOn ? '🔊' : '🔇';
+        }
+        if(prefs.difficulty && DIFF_SETTINGS[prefs.difficulty]){
+          difficulty = prefs.difficulty;
+          [...diffRow.children].forEach(c=>c.classList.toggle('active', c.dataset.diff===difficulty));
+        }
+      }
+    }catch(e){ /* premier lancement, ou stockage indisponible : on garde les valeurs par défaut */ }
+  }
+
+  async function savePrefs(){
+    try{ await window.storage.set('prefs', JSON.stringify({sound:soundOn, difficulty}), false); }
+    catch(e){ /* stockage indisponible : les préférences ne survivront pas à cette session */ }
+  }
+
+  document.getElementById('btnResetStats').addEventListener('click', async ()=>{
+    stats = {games:0, wins:0, losses:0, byRole:emptyByRole()};
+    renderStats();
+    await saveStats();
+  });
+
+  // ---------- Navigation générale ----------
+  document.getElementById('btnStart').addEventListener('click', ()=>{
+    ctx(); // débloque l'audio sur ce premier geste (règle des navigateurs mobiles)
+    newGame();
+    showRole();
+  });
+  document.getElementById('btnRoleContinue').addEventListener('click', ()=>{
+    startNight();
+  });
+  document.getElementById('btnReplay').addEventListener('click', ()=>{
+    newGame();
+    showRole();
+  });
+
+  show('home');
+  loadStats();
+  loadPrefs();
+
+  document.getElementById('btnRules').addEventListener('click', ()=>{
+    show('rules');
+  });
+  document.getElementById('btnRulesClose').addEventListener('click', ()=>{
+    show('home');
+  });
+
+  document.getElementById('btnGoFriends').addEventListener('click', ()=>{
+    ctx();
+    show('mp-home');
+  });
+})();
+</script>
+
+<!-- Multijoueur en ligne (Firebase Firestore) — même projet que Ascension -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBk6XKD0_nuGXO5EtuGqe9LiOVEgNEtC8g",
+    authDomain: "ascension-game-370c0.firebaseapp.com",
+    projectId: "ascension-game-370c0",
+    storageBucket: "ascension-game-370c0.firebasestorage.app",
+    messagingSenderId: "57942969538",
+    appId: "1:57942969538:web:450cb74c51f985e9c5bf5b"
+  };
+</script>
+<script>
+(function(){
+
+  // ---------- Connexion Firestore ----------
+  let db = null;
+  try{
+    if(window.firebase && window.FIREBASE_CONFIG){
+      const appName = 'loup-garou-app';
+      const app = firebase.apps && firebase.apps.find(a=>a.name===appName)
+        ? firebase.app(appName)
+        : firebase.initializeApp(window.FIREBASE_CONFIG, appName);
+      db = app.firestore();
+    }
+  }catch(e){ console.warn('Firebase indisponible', e); db = null; }
+
+  const ROOMS = 'lgRooms';
+  const AVATARS = ['🙂','😎','🧑‍🌾','🧙','🧑‍🚀','🥷','🧑‍🎤','🧑‍🍳','🧑‍🎨','🧑‍🔬','🧛','🧟','🦊','🐻','🐺','🐱'];
+  const ROLE_META = {
+    wolf:    { icon:'🐺', name:'Loup-Garou', cls:'wolf',    desc:"Chaque nuit, entends-toi avec les autres loups pour choisir une victime. Le jour, fonds-toi dans la foule." },
+    seer:    { icon:'🔮', name:'Voyante',    cls:'seer',    desc:"Chaque nuit, sonde un joueur pour découvrir son camp." },
+    witch:   { icon:'🧪', name:'Sorcière',   cls:'witch',   desc:"Deux potions à usage unique : sauver la victime du loup, ou empoisonner quelqu'un." },
+    hunter:  { icon:'🏹', name:'Chasseur',   cls:'hunter',  desc:"Si tu meurs, tu tires une dernière flèche et emportes quelqu'un avec toi." },
+    villager:{ icon:'🕯️', name:'Villageois', cls:'villager',desc:"Pas de pouvoir spécial. Observe, débat et vote pour démasquer le loup-garou." }
+  };
+
+  function rid(){ return Math.random().toString(36).slice(2,10); }
+  function roomCode(){ let s=''; const L='ABCDEFGHJKLMNPQRSTUVWXYZ'; for(let i=0;i<4;i++) s+=L[Math.floor(Math.random()*L.length)]; return s; }
+  function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+  function myUid(roomCodeVal){
+    const key = 'lg-uid-'+roomCodeVal;
+    try{
+      let v = localStorage.getItem(key);
+      if(!v){ v = rid(); localStorage.setItem(key, v); }
+      return v;
+    }catch(e){ return rid(); }
+  }
+  function saveLastRoom(code){
+    try{ localStorage.setItem('lg-last-room', code); }catch(e){}
+  }
+  function getLastRoom(){
+    try{ return localStorage.getItem('lg-last-room'); }catch(e){ return null; }
+  }
+  function clearLastRoom(){
+    try{ localStorage.removeItem('lg-last-room'); }catch(e){}
+  }
+
+  // ---------- État local ----------
+  let mp = {
+    code:null, uid:null, isHost:false,
+    roomUnsub:null, playersUnsub:null,
+    room:{}, players:[], // players = liste triée
+  };
+
+  function me(){ return mp.players.find(p=>p.id===mp.uid); }
+  function alivePlayers(){ return mp.players.filter(p=>p.alive); }
+  function roleCountFor(n){
+    const wolves = n<=6 ? 1 : (n<=9 ? 2 : 3);
+    return {
+      wolf: wolves,
+      seer: n>=5 ? 1:0,
+      witch: n>=6 ? 1:0,
+      hunter: n>=7 ? 1:0
+    };
+  }
+
+  function screenById(id){ return document.getElementById('screen-'+id); }
+  function showScreen(id){
+    document.querySelectorAll('#app main > section').forEach(el=>el.classList.add('hidden'));
+    const el = screenById(id);
+    if(el){ el.classList.remove('hidden'); el.classList.remove('entering'); void el.offsetWidth; el.classList.add('entering'); }
+  }
+
+  function mpError(elId, msg){ const el=document.getElementById(elId); if(el) el.textContent = msg||''; }
+
+  // ---------- Créer / rejoindre ----------
+  const nameInput = document.getElementById('mpNameInput');
+
+  document.getElementById('btnMpCreate').addEventListener('click', async ()=>{
+    if(!db){ mpError('mpHomeError','Connexion en ligne indisponible pour le moment.'); return; }
+    const name = (nameInput.value||'').trim();
+    if(!name){ mpError('mpHomeError','Entre ton pseudo pour créer une partie.'); return; }
+    mpError('mpHomeError','');
+    let code;
+    try{
+      // évite les collisions de code
+      let tries=0;
+      do{ code = roomCode(); tries++; }
+      while(tries<8 && (await db.collection(ROOMS).doc(code).get()).exists);
+      const uid = myUid(code);
+      await db.collection(ROOMS).doc(code).set({
+        phase:'lobby', hostId:uid, dayNumber:0, createdAt:Date.now(), winner:null
+      });
+      await db.collection(ROOMS).doc(code).collection('players').doc(uid).set({
+        name, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)],
+        role:null, alive:true, isHost:true, joinedAt:Date.now(),
+        nightAction:{}, dayVote:null, hunterUsed:false, witchLifeUsed:false, witchDeathUsed:false
+      });
+      enterRoom(code, uid, true);
+    }catch(e){ console.error(e); mpError('mpHomeError',"Impossible de créer la partie. Réessaie."); }
+  });
+
+  document.getElementById('btnMpJoin').addEventListener('click', async ()=>{
+    if(!db){ mpError('mpHomeError','Connexion en ligne indisponible pour le moment.'); return; }
+    const name = (nameInput.value||'').trim();
+    const code = (document.getElementById('mpJoinCodeInput').value||'').trim().toUpperCase();
+    if(!name){ mpError('mpHomeError','Entre ton pseudo pour rejoindre.'); return; }
+    if(code.length!==4){ mpError('mpHomeError','Entre le code à 4 lettres de la partie.'); return; }
+    mpError('mpHomeError','');
+    try{
+      const roomRef = db.collection(ROOMS).doc(code);
+      const roomSnap = await roomRef.get();
+      if(!roomSnap.exists){ mpError('mpHomeError','Aucune partie avec ce code.'); return; }
+      const roomData = roomSnap.data();
+      const uid = myUid(code);
+      const existing = await roomRef.collection('players').doc(uid).get();
+      if(!existing.exists){
+        if(roomData.phase!=='lobby'){ mpError('mpHomeError','Cette partie a déjà commencé.'); return; }
+        const usedAvatars = (await roomRef.collection('players').get()).docs.map(d=>d.data().avatar);
+        const freeAvatar = AVATARS.find(a=>!usedAvatars.includes(a)) || AVATARS[Math.floor(Math.random()*AVATARS.length)];
+        await roomRef.collection('players').doc(uid).set({
+          name, avatar:freeAvatar, role:null, alive:true, isHost:false, joinedAt:Date.now(),
+          nightAction:{}, dayVote:null, hunterUsed:false, witchLifeUsed:false, witchDeathUsed:false
+        });
+      }
+      enterRoom(code, uid, roomData.hostId===uid);
+    }catch(e){ console.error(e); mpError('mpHomeError',"Impossible de rejoindre la partie. Réessaie."); }
+  });
+
+  document.getElementById('btnMpBackHome').addEventListener('click', ()=> showScreen('home'));
+
+  function enterRoom(code, uid, isHost){
+    mp.code = code; mp.uid = uid; mp.isHost = isHost;
+    saveLastRoom(code);
+    if(mp.roomUnsub) mp.roomUnsub();
+    if(mp.playersUnsub) mp.playersUnsub();
+    const roomRef = db.collection(ROOMS).doc(code);
+    mp.roomUnsub = roomRef.onSnapshot(snap=>{
+      if(!snap.exists){ leaveRoom(); return; }
+      mp.room = snap.data();
+      mp.isHost = mp.room.hostId === mp.uid;
+      render();
+    });
+    mp.playersUnsub = roomRef.collection('players').orderBy('joinedAt').onSnapshot(snap=>{
+      mp.players = snap.docs.map(d=>({id:d.id, ...d.data()}));
+      render();
+    });
+  }
+
+  function leaveRoom(){
+    if(mp.roomUnsub) mp.roomUnsub();
+    if(mp.playersUnsub) mp.playersUnsub();
+    mp = {code:null, uid:null, isHost:false, roomUnsub:null, playersUnsub:null, room:{}, players:[]};
+    clearLastRoom();
+    showScreen('mp-home');
+  }
+
+  document.getElementById('btnMpLeaveLobby').addEventListener('click', async ()=>{
+    try{
+      if(mp.code && mp.uid){
+        await db.collection(ROOMS).doc(mp.code).collection('players').doc(mp.uid).delete();
+        if(mp.isHost){ await db.collection(ROOMS).doc(mp.code).delete(); }
+      }
+    }catch(e){}
+    leaveRoom();
+  });
+  document.getElementById('btnMpQuit').addEventListener('click', leaveRoom);
+
+  // ---------- Rendu principal (piloté par room.phase) ----------
+  let lastRenderedPhase = null;
+  function render(){
+    if(!mp.code || !mp.room || !mp.room.phase) return;
+    const phase = mp.room.phase;
+
+    if(phase==='lobby'){ renderLobby(); showScreen('mp-lobby'); return; }
+
+    const my = me();
+    if(!my) return; // en cours de synchro
+
+    if(my.role===null || my.role===undefined){
+      // rôle pas encore vu localement -> forcer passage par l'écran de rôle une fois
+    }
+
+    if(phase==='reveal'){ renderRoleScreen(); return; }
+    if(phase==='night-wolf'){ renderNightSubphase('wolf'); return; }
+    if(phase==='night-seer'){ renderNightSubphase('seer'); return; }
+    if(phase==='night-witch'){ renderNightSubphase('witch'); return; }
+    if(phase==='night-hunter'){ renderHunterPhase(); return; }
+    if(phase==='morning'){ renderMorning(); return; }
+    if(phase==='day'){ renderDay(); return; }
+    if(phase==='vote-result'){ renderVoteResult(); return; }
+    if(phase==='end'){ renderEnd(); return; }
+  }
+
+  function renderLobby(){
+    document.getElementById('mpRoomCode').textContent = mp.code;
+    const list = document.getElementById('mpLobbyPlayers');
+    list.innerHTML='';
+    mp.players.forEach(p=>{
+      const row = document.createElement('div');
+      row.className='mp-player-row';
+      row.innerHTML = `<span class="avatar">${p.avatar}</span><span class="name">${escapeHtml(p.name)}</span>${p.isHost?'<span class="tag2">HÔTE</span>':''}`;
+      list.appendChild(row);
+    });
+    const startBtn = document.getElementById('btnMpStartGame');
+    const waitNote = document.getElementById('mpLobbyWaitNote');
+    if(mp.isHost){
+      startBtn.classList.remove('hidden'); waitNote.classList.add('hidden');
+      startBtn.disabled = mp.players.length < 4;
+      mpError('mpLobbyError', mp.players.length<4 ? `Il faut au moins 4 joueurs (${mp.players.length}/4).` : '');
+    } else {
+      startBtn.classList.add('hidden'); waitNote.classList.remove('hidden');
+      mpError('mpLobbyError','');
+    }
+  }
+
+  document.getElementById('btnMpStartGame').addEventListener('click', async ()=>{
+    if(!mp.isHost || mp.players.length<4) return;
+    const counts = roleCountFor(mp.players.length);
+    let deck = [];
+    for(let i=0;i<counts.wolf;i++) deck.push('wolf');
+    for(let i=0;i<counts.seer;i++) deck.push('seer');
+    for(let i=0;i<counts.witch;i++) deck.push('witch');
+    for(let i=0;i<counts.hunter;i++) deck.push('hunter');
+    while(deck.length < mp.players.length) deck.push('villager');
+    deck = shuffle(deck);
+    const batch = db.batch();
+    const roomRef = db.collection(ROOMS).doc(mp.code);
+    mp.players.forEach((p,i)=>{
+      batch.update(roomRef.collection('players').doc(p.id), {
+        role: deck[i], alive:true, nightAction:{}, dayVote:null,
+        hunterUsed:false, witchLifeUsed:false, witchDeathUsed:false
+      });
+    });
+    batch.update(roomRef, { phase:'reveal', dayNumber:1, winner:null, nightResult:{}, voteResult:{} });
+    await batch.commit();
+  });
+
+  function renderRoleScreen(){
+    const my = me(); if(!my || !my.role) return;
+    const meta = ROLE_META[my.role];
+    const icon = document.getElementById('mpRoleIcon');
+    const nameEl = document.getElementById('mpRoleName');
+    const descEl = document.getElementById('mpRoleDesc');
+    const alliesEl = document.getElementById('mpRoleAllies');
+    icon.textContent = meta.icon; icon.className='role-icon '+meta.cls;
+    nameEl.textContent = meta.name; nameEl.className='role-name '+meta.cls;
+    descEl.textContent = meta.desc;
+    alliesEl.textContent='';
+    if(my.role==='wolf'){
+      const others = mp.players.filter(p=>p.role==='wolf' && p.id!==my.id);
+      if(others.length) alliesEl.textContent = 'Les autres loups : '+others.map(p=>p.name).join(', ');
+      else alliesEl.textContent = 'Tu es le seul loup-garou.';
+    }
+    showScreen('mp-role');
+  }
+  document.getElementById('btnMpRoleContinue').addEventListener('click', async ()=>{
+    // le premier qui clique fait avancer si tout le monde a vu (simplifié: hôte avance dès que prêt)
+    if(mp.isHost){
+      await db.collection(ROOMS).doc(mp.code).update({ phase:'night-wolf' });
+    } else {
+      showScreen('mp-wait');
+      document.getElementById('mpWaitTitle').textContent = '🌙 En attente';
+      document.getElementById('mpWaitText').textContent = "En attente que la nuit commence…";
+      document.getElementById('btnMpHostAdvance').classList.add('hidden');
+    }
+  });
+
+  // ---------- Nuit : loups / voyante / sorcière ----------
+  function livingWithRole(role){ return alivePlayers().filter(p=>p.role===role); }
+
+  function villagerCard(p, {selected=false}={}){
+    const div = document.createElement('div');
+    div.className = 'villager selectable'+(selected?' selected':'')+(p.id===mp.uid?' you':'');
+    div.dataset.id = p.id;
+    div.innerHTML = `<span class="avatar">${p.avatar}</span><div class="name">${escapeHtml(p.name)}${p.id===mp.uid?' (toi)':''}</div>`;
+    return div;
+  }
+
+  function renderNightSubphase(role){
+    const my = me();
+    const actingNow = my.alive && my.role===role;
+    if(!actingNow){
+      showScreen('mp-wait');
+      document.getElementById('mpWaitTitle').textContent = '🌑 Nuit tombée';
+      const label = role==='wolf' ? 'Le loup-garou choisit sa proie…' : role==='seer' ? 'La voyante sonde quelqu\'un…' : 'La sorcière prépare ses potions…';
+      document.getElementById('mpWaitText').textContent = label;
+      const advBtn = document.getElementById('btnMpHostAdvance');
+      if(mp.isHost){
+        advBtn.classList.remove('hidden');
+        advBtn.onclick = ()=> advanceNightPhase(role, true);
+      } else advBtn.classList.add('hidden');
+      return;
+    }
+
+    const title = document.getElementById('mpNightTitle');
+    const sub = document.getElementById('mpNightSub');
+    const grid = document.getElementById('mpNightVillagers');
+    const confirmBtn = document.getElementById('btnMpNightConfirm');
+    const skipBtn = document.getElementById('btnMpNightSkip');
+    grid.innerHTML=''; mpError('mpNightNote','');
+    let selectedId = (mp.room.nightResult && mp.room.nightResult['pick_'+mp.uid]) || null;
+
+    if(role==='wolf'){
+      title.textContent = '🐺 Chasse nocturne';
+      sub.textContent = 'Choisissez une victime avec les autres loups (le vote majoritaire tranche).';
+      const targets = alivePlayers().filter(p=>p.role!=='wolf');
+      targets.forEach(p=>{
+        const card = villagerCard(p, {selected: my.nightAction && my.nightAction.wolfVote===p.id});
+        card.addEventListener('click', async ()=>{
+          await updateMyNightAction({wolfVote:p.id});
+        });
+        grid.appendChild(card);
+      });
+      confirmBtn.classList.add('hidden'); skipBtn.classList.add('hidden');
+    } else if(role==='seer'){
+      title.textContent = '🔮 Vision nocturne';
+      sub.textContent = 'Choisis quelqu\'un à sonder cette nuit.';
+      const targets = alivePlayers().filter(p=>p.id!==my.id);
+      const already = my.nightAction && my.nightAction.seerTarget;
+      targets.forEach(p=>{
+        const card = villagerCard(p, {selected: already===p.id});
+        if(already){ card.classList.add('dead'); }
+        else card.addEventListener('click', async ()=>{ await updateMyNightAction({seerTarget:p.id}); });
+        grid.appendChild(card);
+      });
+      if(already){
+        const target = mp.players.find(p=>p.id===already);
+        const result = document.createElement('div');
+        result.className='log';
+        result.innerHTML = `<p>${escapeHtml(target.name)} est <span class="tag ${target.role==='wolf'?'wolf':''}">${target.role==='wolf' ? 'le loup-garou 🐺' : 'un villageois innocent'}</span>.</p>`;
+        grid.after(result);
+      }
+      confirmBtn.classList.add('hidden'); skipBtn.classList.add('hidden');
+    } else if(role==='witch'){
+      title.textContent = '🧪 Antre de la sorcière';
+      const victimId = mp.room.nightResult && mp.room.nightResult.pendingVictim;
+      const victim = victimId ? mp.players.find(p=>p.id===victimId) : null;
+      sub.textContent = victim ? `Cette nuit, le loup a désigné ${victim.name}.` : "Le loup n'a fait aucune victime cette nuit.";
+      const already = my.nightAction || {};
+      if(victim && !my.witchLifeUsed){
+        const saveBtn = document.createElement('button');
+        saveBtn.className='btn btn-ghost'+(already.witchSave?' selected':'');
+        saveBtn.textContent = already.witchSave ? '✓ Potion de vie utilisée' : `Sauver ${victim.name} (potion de vie)`;
+        saveBtn.disabled = !!already.witchSave;
+        saveBtn.addEventListener('click', async ()=>{ await updateMyNightAction({witchSave:true}); });
+        grid.appendChild(saveBtn);
+      }
+      const poisonNote = document.createElement('div');
+      poisonNote.className='phase-sub'; poisonNote.style.marginTop='14px';
+      poisonNote.textContent = my.witchDeathUsed ? 'Potion de mort déjà utilisée.' : 'Empoisonner quelqu\'un (facultatif) :';
+      grid.appendChild(poisonNote);
+      if(!my.witchDeathUsed){
+        const targets = alivePlayers().filter(p=>p.id!==my.id);
+        const row = document.createElement('div'); row.className='villagers';
+        targets.forEach(p=>{
+          const card = villagerCard(p, {selected: already.witchPoison===p.id});
+          card.addEventListener('click', async ()=>{
+            const val = already.witchPoison===p.id ? null : p.id;
+            await updateMyNightAction({witchPoison:val});
+          });
+          row.appendChild(card);
+        });
+        grid.appendChild(row);
+      }
+      confirmBtn.classList.remove('hidden'); confirmBtn.textContent='Continuer';
+      confirmBtn.disabled=false;
+      confirmBtn.onclick = ()=>{ if(mp.isHost) advanceNightPhase('witch', true); else waitForOthers('witch'); };
+      skipBtn.classList.add('hidden');
+    }
+    showScreen('mp-night');
+
+    if((role==='wolf' || role==='seer')){
+      // bouton unique de validation en bas commun aux deux
+      confirmBtn.classList.remove('hidden');
+      confirmBtn.textContent = role==='wolf' ? "Confirmer le vote" : (my.nightAction && my.nightAction.seerTarget ? 'Continuer' : 'Choisis quelqu\'un');
+      confirmBtn.disabled = role==='wolf' ? !(my.nightAction && my.nightAction.wolfVote) : !(my.nightAction && my.nightAction.seerTarget);
+      confirmBtn.onclick = ()=>{ if(mp.isHost) advanceNightPhase(role, true); else waitForOthers(role); };
+    }
+  }
+
+  async function updateMyNightAction(patch){
+    const my = me(); if(!my) return;
+    const merged = Object.assign({}, my.nightAction||{}, patch);
+    await db.collection(ROOMS).doc(mp.code).collection('players').doc(mp.uid).update({ nightAction: merged });
+  }
+
+  function waitForOthers(role){
+    showScreen('mp-wait');
+    document.getElementById('mpWaitTitle').textContent = '🌑 Nuit tombée';
+    document.getElementById('mpWaitText').textContent = "En attente de la suite…";
+    document.getElementById('btnMpHostAdvance').classList.add('hidden');
+  }
+
+  async function advanceNightPhase(role, forced){
+    if(!mp.isHost) return;
+    const roomRef = db.collection(ROOMS).doc(mp.code);
+    if(role==='wolf'){
+      const wolves = livingWithRole('wolf');
+      const tally = {};
+      wolves.forEach(w=>{ const t=w.nightAction && w.nightAction.wolfVote; if(t) tally[t]=(tally[t]||0)+1; });
+      let victim=null, best=-1;
+      Object.keys(tally).forEach(k=>{ if(tally[k]>best){ best=tally[k]; victim=k; } });
+      const next = livingWithRole('seer').length ? 'night-seer' : (livingWithRole('witch').length ? 'night-witch' : 'morning');
+      let update = { nightResult: Object.assign({}, mp.room.nightResult||{}, {pendingVictim: victim}), phase: next };
+      if(next==='morning'){ update = Object.assign(update, await computeNightDeaths(victim, null, null)); }
+      await roomRef.update(update);
+    } else if(role==='seer'){
+      const next = livingWithRole('witch').length ? 'night-witch' : 'morning';
+      let update = { phase: next };
+      if(next==='morning'){
+        const victim = mp.room.nightResult && mp.room.nightResult.pendingVictim;
+        update = Object.assign(update, await computeNightDeaths(victim, null, null));
+      }
+      await roomRef.update(update);
+    } else if(role==='witch'){
+      const witch = livingWithRole('witch')[0];
+      const victim = mp.room.nightResult && mp.room.nightResult.pendingVictim;
+      const saved = witch && witch.nightAction && witch.nightAction.witchSave;
+      const poisoned = witch && witch.nightAction && witch.nightAction.witchPoison;
+      if(witch){
+        await roomRef.collection('players').doc(witch.id).update({
+          witchLifeUsed: witch.witchLifeUsed || !!saved,
+          witchDeathUsed: witch.witchDeathUsed || !!poisoned
+        });
+      }
+      const update = await computeNightDeaths(victim, saved?victim:null, poisoned||null);
+      await roomRef.update(update);
+    }
+  }
+
+  async function computeNightDeaths(victimId, savedId, poisonId){
+    const deaths = [];
+    if(victimId && victimId!==savedId) deaths.push({id:victimId, cause:'wolf'});
+    if(poisonId) deaths.push({id:poisonId, cause:'poison'});
+    const roomRef = db.collection(ROOMS).doc(mp.code);
+    for(const d of deaths){
+      await roomRef.collection('players').doc(d.id).update({alive:false});
+    }
+    // mise à jour locale temporaire pour calculs suivants
+    const deadIds = deaths.map(d=>d.id);
+    const stillAlive = mp.players.filter(p=>!deadIds.includes(p.id) && p.alive);
+    const win = checkWinner(stillAlive);
+    const nightResult = Object.assign({}, mp.room.nightResult||{}, {deaths, pendingVictim: victimId||null});
+    const fallenHunter = deaths.map(d=>mp.players.find(p=>p.id===d.id)).find(p=>p && p.role==='hunter' && !p.hunterUsed);
+    if(!win && fallenHunter){
+      return { nightResult: Object.assign(nightResult,{pendingHunterId:fallenHunter.id, pendingHunterSource:'night'}), phase:'night-hunter' };
+    }
+    return { nightResult, phase: win ? 'end':'morning', winner: win||null };
+  }
+
+  function checkWinner(alivePool){
+    const wolves = alivePool.filter(p=>p.role==='wolf').length;
+    const others = alivePool.filter(p=>p.role!=='wolf').length;
+    if(wolves===0) return 'village';
+    if(wolves>=others) return 'wolves';
+    return null;
+  }
+
+  // ---------- Chasseur (mort -> flèche) ----------
+  function renderHunterPhase(){
+    const my = me();
+    const hunterId = mp.room.nightResult && mp.room.nightResult.pendingHunterId;
+    if(my.id!==hunterId){
+      showScreen('mp-wait');
+      document.getElementById('mpWaitTitle').textContent = '🏹 Dernière flèche';
+      document.getElementById('mpWaitText').textContent = 'Le chasseur choisit sa dernière cible…';
+      const advBtn = document.getElementById('btnMpHostAdvance');
+      if(mp.isHost){ advBtn.classList.remove('hidden'); advBtn.onclick = ()=> advanceHunter(null); }
+      else advBtn.classList.add('hidden');
+      return;
+    }
+    const title = document.getElementById('mpNightTitle');
+    const sub = document.getElementById('mpNightSub');
+    const grid = document.getElementById('mpNightVillagers');
+    const confirmBtn = document.getElementById('btnMpNightConfirm');
+    const skipBtn = document.getElementById('btnMpNightSkip');
+    title.textContent = '🏹 Dernière flèche';
+    sub.textContent = "Tu es tombé... choisis quelqu'un à entraîner avec toi, ou ne tire sur personne.";
+    grid.innerHTML='';
+    const targets = alivePlayers().filter(p=>p.id!==my.id);
+    let selected = null;
+    targets.forEach(p=>{
+      const card = villagerCard(p, {});
+      card.addEventListener('click', ()=>{
+        selected = p.id;
+        [...grid.children].forEach(c=>c.classList.remove('selected'));
+        card.classList.add('selected');
+        confirmBtn.disabled=false;
+      });
+      grid.appendChild(card);
+    });
+    confirmBtn.classList.remove('hidden'); confirmBtn.textContent='Tirer'; confirmBtn.disabled=true;
+    confirmBtn.onclick = ()=> advanceHunter(selected);
+    skipBtn.classList.remove('hidden');
+    skipBtn.onclick = ()=> advanceHunter(null);
+    showScreen('mp-night');
+  }
+
+  async function advanceHunter(targetId){
+    const roomRef = db.collection(ROOMS).doc(mp.code);
+    const hunterId = mp.room.nightResult.pendingHunterId;
+    await roomRef.collection('players').doc(hunterId).update({hunterUsed:true});
+    const deaths = (mp.room.nightResult.deaths||[]).slice();
+    if(targetId){
+      await roomRef.collection('players').doc(targetId).update({alive:false});
+      deaths.push({id:targetId, cause:'hunter'});
+    }
+    const deadIds = deaths.map(d=>d.id);
+    const stillAlive = mp.players.filter(p=>!deadIds.includes(p.id) && p.alive);
+    const win = checkWinner(stillAlive);
+    const source = mp.room.nightResult.pendingHunterSource;
+    const nightResult = Object.assign({}, mp.room.nightResult, {deaths, pendingHunterId:null});
+    const nextPhase = win ? 'end' : (source==='day' ? 'vote-result' : 'morning');
+    await roomRef.update({ nightResult, phase: nextPhase, winner: win||null });
+  }
+
+  // ---------- Matin ----------
+  function renderMorning(){
+    const log = document.getElementById('mpMorningLog');
+    const deaths = (mp.room.nightResult && mp.room.nightResult.deaths) || [];
+    log.innerHTML='';
+    if(!deaths.length){
+      log.innerHTML = '<p>Le village se réveille... personne n\'est mort cette nuit. Une nuit calme.</p>';
+    } else {
+      deaths.forEach(d=>{
+        const p = mp.players.find(x=>x.id===d.id);
+        if(!p) return;
+        const cause = d.cause==='wolf' ? 'dévoré par le loup-garou' : d.cause==='poison' ? 'empoisonné par la sorcière' : 'entraîné par le chasseur';
+        const line = document.createElement('p');
+        line.innerHTML = `<span class="tag">${escapeHtml(p.name)}</span> a été ${cause}.`;
+        log.appendChild(line);
+      });
+    }
+    const btn = document.getElementById('btnMpMorningContinue');
+    const wait = document.getElementById('mpMorningWaitNote');
+    if(mp.isHost){ btn.classList.remove('hidden'); wait.classList.add('hidden'); }
+    else { btn.classList.add('hidden'); wait.classList.remove('hidden'); }
+    showScreen('mp-morning');
+  }
+  document.getElementById('btnMpMorningContinue').addEventListener('click', async ()=>{
+    if(!mp.isHost) return;
+    const roomRef = db.collection(ROOMS).doc(mp.code);
+    const batch = db.batch();
+    mp.players.forEach(p=>{ batch.update(roomRef.collection('players').doc(p.id), {dayVote:null}); });
+    batch.update(roomRef, { phase:'day' });
+    await batch.commit();
+  });
+
+  // ---------- Jour : vote ----------
+  function renderDay(){
+    const my = me();
+    const grid = document.getElementById('mpDayVillagers');
+    grid.innerHTML='';
+    const voteBtn = document.getElementById('btnMpVoteConfirm');
+    if(!my.alive){
+      const p = document.createElement('p'); p.className='center-note';
+      p.textContent = 'Tu es éliminé — observe la suite en silence.';
+      grid.appendChild(p);
+      voteBtn.classList.add('hidden');
+    } else {
+      alivePlayers().forEach(p=>{
+        const card = villagerCard(p, {selected: my.dayVote===p.id});
+        card.addEventListener('click', async ()=>{
+          await db.collection(ROOMS).doc(mp.code).collection('players').doc(mp.uid).update({dayVote:p.id});
+        });
+        grid.appendChild(card);
+      });
+      voteBtn.classList.remove('hidden');
+      voteBtn.disabled = !my.dayVote;
+    }
+    const revealBtn = document.getElementById('btnMpDayReveal');
+    if(mp.isHost) revealBtn.classList.remove('hidden'); else revealBtn.classList.add('hidden');
+    showScreen('mp-day');
+  }
+  document.getElementById('btnMpVoteConfirm').addEventListener('click', ()=>{
+    const el = document.getElementById('btnMpVoteConfirm');
+    el.disabled = true; el.textContent = 'Vote enregistré ✓';
+  });
+  document.getElementById('btnMpDayReveal').addEventListener('click', async ()=>{
+    if(!mp.isHost) return;
+    const alive = alivePlayers();
+    const tally={};
+    alive.forEach(p=>{ if(p.dayVote) tally[p.dayVote]=(tally[p.dayVote]||0)+1; });
+    let eliminatedId=null, best=0, tie=false;
+    Object.keys(tally).forEach(k=>{ if(tally[k]>best){best=tally[k]; eliminatedId=k; tie=false;} else if(tally[k]===best){tie=true;} });
+    if(tie) eliminatedId=null;
+    const roomRef = db.collection(ROOMS).doc(mp.code);
+    let update = { voteResult:{eliminatedId, tally} };
+    if(eliminatedId){
+      await roomRef.collection('players').doc(eliminatedId).update({alive:false});
+      const elimPlayer = mp.players.find(p=>p.id===eliminatedId);
+      const stillAlive = mp.players.filter(p=>p.id!==eliminatedId && p.alive);
+      const win = checkWinner(stillAlive);
+      if(!win && elimPlayer && elimPlayer.role==='hunter' && !elimPlayer.hunterUsed){
+        update.nightResult = Object.assign({}, mp.room.nightResult||{}, {pendingHunterId:eliminatedId, pendingHunterSource:'day', deaths:[]});
+        update.phase = 'night-hunter';
+      } else {
+        update.phase = win ? 'end' : 'vote-result';
+        update.winner = win||null;
+      }
+    } else {
+      update.phase = 'vote-result';
+    }
+    await roomRef.update(update);
+  });
+
+  function renderVoteResult(){
+    const log = document.getElementById('mpVoteLog');
+    const vr = mp.room.voteResult||{};
+    log.innerHTML='';
+    if(!vr.eliminatedId){
+      log.innerHTML = '<p>Égalité des voix — personne n\'est banni ce jour-ci.</p>';
+    } else {
+      const p = mp.players.find(x=>x.id===vr.eliminatedId);
+      const meta = p ? ROLE_META[p.role] : null;
+      log.innerHTML = `<p><span class="tag">${p?escapeHtml(p.name):'?'}</span> est banni par le village. Il était <b>${meta?meta.name:''}</b>.</p>`;
+    }
+    (mp.room.nightResult && (mp.room.nightResult.deaths=[]));
+    const btn = document.getElementById('btnMpVoteResultContinue');
+    const wait = document.getElementById('mpVoteResultWaitNote');
+    if(mp.isHost){ btn.classList.remove('hidden'); wait.classList.add('hidden'); } else { btn.classList.add('hidden'); wait.classList.remove('hidden'); }
+    showScreen('mp-vote-result');
+  }
+  document.getElementById('btnMpVoteResultContinue').addEventListener('click', async ()=>{
+    if(!mp.isHost) return;
+    const roomRef = db.collection(ROOMS).doc(mp.code);
+    const batch = db.batch();
+    mp.players.forEach(p=>{ batch.update(roomRef.collection('players').doc(p.id), {nightAction:{}}); });
+    batch.update(roomRef, { phase:'night-wolf', dayNumber:(mp.room.dayNumber||1)+1, nightResult:{} });
+    await batch.commit();
+  });
+
+  // ---------- Fin de partie ----------
+  function renderEnd(){
+    const win = mp.room.winner;
+    const icon = document.getElementById('mpEndIcon');
+    const title = document.getElementById('mpEndTitle');
+    const desc = document.getElementById('mpEndDesc');
+    icon.textContent = win==='wolves' ? '🐺' : '🏆';
+    title.textContent = win==='wolves' ? 'Victoire des loups' : 'Victoire du village';
+    desc.textContent = win==='wolves' ? "Les loups-garous ont pris le dessus sur le village." : "Le village a démasqué tous les loups-garous !";
+    const reveal = document.getElementById('mpEndReveal');
+    reveal.innerHTML='';
+    mp.players.forEach(p=>{
+      const meta = ROLE_META[p.role]||ROLE_META.villager;
+      const row = document.createElement('div');
+      row.className='reveal-row'+(p.alive?'':' dead');
+      row.innerHTML = `<span class="avatar">${p.avatar}</span><span class="name">${escapeHtml(p.name)}</span><span class="role ${meta.cls}">${meta.name}</span>`;
+      reveal.appendChild(row);
+    });
+    const btn = document.getElementById('btnMpReplay');
+    const wait = document.getElementById('mpEndWaitNote');
+    if(mp.isHost){ btn.classList.remove('hidden'); wait.classList.add('hidden'); } else { btn.classList.add('hidden'); wait.classList.remove('hidden'); }
+    showScreen('mp-end');
+  }
+  document.getElementById('btnMpReplay').addEventListener('click', async ()=>{
+    if(!mp.isHost) return;
+    const roomRef = db.collection(ROOMS).doc(mp.code);
+    const batch = db.batch();
+    mp.players.forEach(p=>{
+      batch.update(roomRef.collection('players').doc(p.id), {
+        role:null, alive:true, nightAction:{}, dayVote:null, hunterUsed:false, witchLifeUsed:false, witchDeathUsed:false
+      });
+    });
+    batch.update(roomRef, { phase:'lobby', dayNumber:0, winner:null, nightResult:{}, voteResult:{} });
+    await batch.commit();
+  });
+
+  function escapeHtml(s){
+    return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- Reconnexion automatique ----------
+  const last = getLastRoom();
+  if(last && db){
+    const uid = myUid(last);
+    db.collection(ROOMS).doc(last).get().then(snap=>{
+      if(snap.exists){
+        db.collection(ROOMS).doc(last).collection('players').doc(uid).get().then(pSnap=>{
+          if(pSnap.exists) enterRoom(last, uid, snap.data().hostId===uid);
+          else clearLastRoom();
+        });
+      } else clearLastRoom();
+    }).catch(()=>{});
+  }
+})();
+</script>
+
+</body>
+</html>
