@@ -1763,7 +1763,13 @@
         nightAction:{}, dayVote:null, hunterUsed:false, witchLifeUsed:false, witchDeathUsed:false
       });
       enterRoom(code, uid, true);
-    }catch(e){ console.error(e); mpError('mpHomeError',"Impossible de créer la partie. Réessaie."); }
+    }catch(e){
+      console.error(e);
+      const code2 = e && e.code ? ` (${e.code})` : '';
+      mpError('mpHomeError', e && e.code==='permission-denied'
+        ? "Accès refusé par Firestore — les règles de sécurité doivent autoriser la collection lgRooms."
+        : "Impossible de créer la partie"+code2+". Réessaie.");
+    }
   });
 
   document.getElementById('btnMpJoin').addEventListener('click', async ()=>{
@@ -1790,7 +1796,13 @@
         });
       }
       enterRoom(code, uid, roomData.hostId===uid);
-    }catch(e){ console.error(e); mpError('mpHomeError',"Impossible de rejoindre la partie. Réessaie."); }
+    }catch(e){
+      console.error(e);
+      const code2 = e && e.code ? ` (${e.code})` : '';
+      mpError('mpHomeError', e && e.code==='permission-denied'
+        ? "Accès refusé par Firestore — les règles de sécurité doivent autoriser la collection lgRooms."
+        : "Impossible de rejoindre la partie"+code2+". Réessaie.");
+    }
   });
 
   document.getElementById('btnMpBackHome').addEventListener('click', ()=> showScreen('home'));
