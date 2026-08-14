@@ -19,6 +19,12 @@
     --arcane-glow:#a98cff;
     --ember:#d97a3f;
     --ember-glow:#f5975f;
+    --cupid:#ff6f9c;
+    --cupid-glow:#ff9dc0;
+    --thief:#8a8f9c;
+    --thief-glow:#b7bdca;
+    --girl:#e37ab0;
+    --girl-glow:#f4a6d4;
     --font-display: 'Cormorant Garamond', Georgia, serif;
     --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
@@ -182,12 +188,18 @@
   .role-icon.seer{ background:radial-gradient(circle, rgba(138,111,214,.35), transparent 70%); box-shadow:0 0 30px rgba(138,111,214,.5);}
   .role-icon.witch{ background:radial-gradient(circle, rgba(92,138,92,.35), transparent 70%); box-shadow:0 0 30px rgba(92,138,92,.5);}
   .role-icon.hunter{ background:radial-gradient(circle, rgba(217,122,63,.35), transparent 70%); box-shadow:0 0 30px rgba(217,122,63,.5);}
+  .role-icon.cupid{ background:radial-gradient(circle, rgba(255,111,156,.35), transparent 70%); box-shadow:0 0 30px rgba(255,111,156,.5);}
+  .role-icon.thief{ background:radial-gradient(circle, rgba(138,143,156,.35), transparent 70%); box-shadow:0 0 30px rgba(138,143,156,.5);}
+  .role-icon.littlegirl{ background:radial-gradient(circle, rgba(227,122,176,.35), transparent 70%); box-shadow:0 0 30px rgba(227,122,176,.5);}
   .role-name{ font-family:var(--font-display); font-size:30px; font-weight:600;}
   .role-name.wolf{ color:var(--blood-glow); }
   .role-name.villager{ color:var(--lantern); }
   .role-name.seer{ color:var(--arcane-glow); }
   .role-name.witch{ color:var(--leaf); }
   .role-name.hunter{ color:var(--ember-glow); }
+  .role-name.cupid{ color:var(--cupid-glow); }
+  .role-name.thief{ color:var(--thief-glow); }
+  .role-name.littlegirl{ color:var(--girl-glow); }
   .role-desc{ color:var(--moon-dim); font-size:14px; margin-top:8px; line-height:1.5; }
 
   /* villagers grid */
@@ -276,6 +288,9 @@
   .reveal-row .role.seer{ color:var(--arcane-glow); }
   .reveal-row .role.witch{ color:var(--leaf); }
   .reveal-row .role.hunter{ color:var(--ember-glow); }
+  .reveal-row .role.cupid{ color:var(--cupid-glow); }
+  .reveal-row .role.thief{ color:var(--thief-glow); }
+  .reveal-row .role.littlegirl{ color:var(--girl-glow); }
   .reveal-row .role.villager{ color:var(--lantern); }
   .reveal-row.dead{ opacity:.6; }
 
@@ -353,6 +368,9 @@
   .rule-name.seer{ color:var(--arcane-glow); }
   .rule-name.witch{ color:var(--leaf); }
   .rule-name.hunter{ color:var(--ember-glow); }
+  .rule-name.cupid{ color:var(--cupid-glow); }
+  .rule-name.thief{ color:var(--thief-glow); }
+  .rule-name.littlegirl{ color:var(--girl-glow); }
   .rule-name.villager{ color:var(--lantern); }
   .rule-desc{ color:var(--moon-dim); font-size:13px; line-height:1.45; }
 </style>
@@ -492,7 +510,7 @@
     <section id="screen-rules" class="card hidden">
       <div class="eyebrow">Comment jouer</div>
       <h1 class="hero" style="font-size:28px;">Les rôles</h1>
-      <p class="sub">Chaque nuit, les rôles spéciaux agissent en secret dans l'ordre : loup-garou → voyante → sorcière → (chasseur, si besoin). Le jour, tout le monde débat puis vote pour bannir un suspect. Le village gagne si le loup-garou est éliminé ; le loup gagne s'il ne reste plus qu'un villageois face à lui.</p>
+      <p class="sub">En mode entre amis, la toute première nuit commence par le voleur puis cupidon, avant l'ordre habituel : loup-garou → petite fille → voyante → sorcière → (chasseur, si besoin). Le jour, tout le monde débat puis vote pour bannir un suspect. Le village gagne si tous les loups sont éliminés ; les loups gagnent s'ils sont à égalité ou en surnombre face au reste du village. Les amoureux de cupidon gagnent ensemble s'ils sont les deux derniers survivants.</p>
       <div class="rule-row">
         <div class="rule-icon">🐺</div>
         <div>
@@ -526,6 +544,27 @@
         <div>
           <div class="rule-name villager">Villageois</div>
           <div class="rule-desc">Pas de pouvoir spécial. Observe, débat et vote pour démasquer le loup-garou.</div>
+        </div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-icon">💘</div>
+        <div>
+          <div class="rule-name cupid">Cupidon</div>
+          <div class="rule-desc">Uniquement en mode entre amis. La toute première nuit, désigne deux amoureux (qui peuvent l'inclure). S'ils meurent, ils meurent tous les deux ; s'ils restent les deux derniers en vie, ils gagnent ensemble, quel que soit leur camp.</div>
+        </div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-icon">🗡️</div>
+        <div>
+          <div class="rule-name thief">Voleur</div>
+          <div class="rule-desc">Uniquement en mode entre amis. Avant la première nuit, découvre deux cartes mises de côté et peut échanger sa carte contre l'une d'elles — sauf si les deux sont des loups-garous, où l'échange est obligatoire.</div>
+        </div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-icon">👧</div>
+        <div>
+          <div class="rule-name littlegirl">Petite Fille</div>
+          <div class="rule-desc">Uniquement en mode entre amis. Pendant le tour des loups, peut risquer un œil pour tenter de les repérer — au risque de se faire surprendre et démasquer.</div>
         </div>
       </div>
       <button class="btn btn-primary" id="btnRulesClose" style="margin-top:16px;">Retour</button>
@@ -1687,6 +1726,9 @@
     seer:    { icon:'🔮', name:'Voyante',    cls:'seer',    desc:"Chaque nuit, sonde un joueur pour découvrir son camp." },
     witch:   { icon:'🧪', name:'Sorcière',   cls:'witch',   desc:"Deux potions à usage unique : sauver la victime du loup, ou empoisonner quelqu'un." },
     hunter:  { icon:'🏹', name:'Chasseur',   cls:'hunter',  desc:"Si tu meurs, tu tires une dernière flèche et emportes quelqu'un avec toi." },
+    cupid:   { icon:'💘', name:'Cupidon',    cls:'cupid',   desc:"La première nuit, désigne deux amoureux. S'ils meurent, ils meurent tous les deux — et gagnent ensemble s'ils restent les deux derniers en vie." },
+    thief:   { icon:'🗡️', name:'Voleur',     cls:'thief',   desc:"Avant la première nuit, regarde deux cartes mises de côté et peut échanger sa carte contre l'une d'elles." },
+    littlegirl:{ icon:'👧', name:'Petite Fille', cls:'littlegirl', desc:"Peut espionner discrètement les loups-garous pendant leur tour, au risque de se faire repérer." },
     villager:{ icon:'🕯️', name:'Villageois', cls:'villager',desc:"Pas de pouvoir spécial. Observe, débat et vote pour démasquer le loup-garou." }
   };
   const MAX_PLAYERS_LIMIT = 24;
@@ -1729,13 +1771,28 @@
       wolf: wolves,
       seer: n>=5 ? 1:0,
       witch: n>=6 ? 1:0,
-      hunter: n>=7 ? 1:0
+      hunter: n>=7 ? 1:0,
+      cupid: 0,
+      thief: 0,
+      littlegirl: 0
     };
   }
   function currentSettings(){
     return Object.assign(defaultSettingsFor(mp.players.length), mp.room.settings||{});
   }
-  function specialsTotal(s){ return s.wolf + s.seer + s.witch + s.hunter; }
+  function specialsTotal(s){ return s.wolf + s.seer + s.witch + s.hunter + (s.cupid||0) + (s.thief||0) + (s.littlegirl||0); }
+  function compositionText(s, villagers){
+    const parts = [];
+    if(s.wolf) parts.push(`${s.wolf} loup(s)`);
+    if(s.seer) parts.push(`${s.seer} voyante(s)`);
+    if(s.witch) parts.push(`${s.witch} sorcière(s)`);
+    if(s.hunter) parts.push(`${s.hunter} chasseur(s)`);
+    if(s.cupid) parts.push(`${s.cupid} cupidon`);
+    if(s.thief) parts.push(`${s.thief} voleur`);
+    if(s.littlegirl) parts.push(`${s.littlegirl} petite(s) fille(s)`);
+    parts.push(`${villagers} villageois(es)`);
+    return parts.join(', ');
+  }
 
   function screenById(id){ return document.getElementById('screen-'+id); }
   function showScreen(id){
@@ -1871,7 +1928,10 @@
     }
 
     if(phase==='reveal'){ renderRoleScreen(); return; }
+    if(phase==='thief'){ renderThief(); return; }
+    if(phase==='cupid'){ renderCupid(); return; }
     if(phase==='night-wolf'){ renderNightSubphase('wolf'); return; }
+    if(phase==='night-littlegirl'){ renderNightSubphase('littlegirl'); return; }
     if(phase==='night-seer'){ renderNightSubphase('seer'); return; }
     if(phase==='night-witch'){ renderNightSubphase('witch'); return; }
     if(phase==='night-hunter'){ renderHunterPhase(); return; }
@@ -1908,6 +1968,9 @@
       settingsEl.appendChild(stepperRow('🔮 Voyantes', s.seer, 0, 2, v=>updateSettings({seer:v})));
       settingsEl.appendChild(stepperRow('🧪 Sorcières', s.witch, 0, 2, v=>updateSettings({witch:v})));
       settingsEl.appendChild(stepperRow('🏹 Chasseurs', s.hunter, 0, 2, v=>updateSettings({hunter:v})));
+      settingsEl.appendChild(stepperRow('💘 Cupidon', s.cupid||0, 0, 1, v=>updateSettings({cupid:v})));
+      settingsEl.appendChild(stepperRow('🗡️ Voleur', s.thief||0, 0, 1, v=>updateSettings({thief:v})));
+      settingsEl.appendChild(stepperRow('👧 Petite(s) Fille(s)', s.littlegirl||0, 0, 2, v=>updateSettings({littlegirl:v})));
       const note = document.createElement('p');
       note.className='center-note';
       note.textContent = `= ${villagers} villageois (${specials} cartes spéciales / ${n} joueurs)`;
@@ -1915,7 +1978,7 @@
     } else {
       const note = document.createElement('p');
       note.className='center-note';
-      note.textContent = `Cartes : ${s.wolf} loup(s), ${s.seer} voyante(s), ${s.witch} sorcière(s), ${s.hunter} chasseur(s), ${villagers} villageois(es).`;
+      note.textContent = `Cartes : ${compositionText(s, villagers)}.`;
       settingsEl.appendChild(note);
     }
 
@@ -1969,8 +2032,16 @@
     for(let i=0;i<s.seer;i++) deck.push('seer');
     for(let i=0;i<s.witch;i++) deck.push('witch');
     for(let i=0;i<s.hunter;i++) deck.push('hunter');
+    for(let i=0;i<(s.cupid||0);i++) deck.push('cupid');
+    for(let i=0;i<(s.thief||0);i++) deck.push('thief');
+    for(let i=0;i<(s.littlegirl||0);i++) deck.push('littlegirl');
     while(deck.length < mp.players.length) deck.push('villager');
     deck = shuffle(deck);
+    let thiefExtra = null;
+    if(s.thief){
+      const pool = ['villager','villager','wolf'];
+      thiefExtra = [pool[Math.floor(Math.random()*pool.length)], pool[Math.floor(Math.random()*pool.length)]];
+    }
     const batch = db.batch();
     const roomRef = db.collection(ROOMS).doc(mp.code);
     mp.players.forEach((p,i)=>{
@@ -1979,7 +2050,7 @@
         hunterUsed:false, witchLifeUsed:false, witchDeathUsed:false
       });
     });
-    batch.update(roomRef, { phase:'reveal', dayNumber:1, winner:null, nightResult:{}, voteResult:{} });
+    batch.update(roomRef, { phase:'reveal', dayNumber:1, winner:null, nightResult:{}, voteResult:{}, thiefExtra: thiefExtra, lovers: null });
     await batch.commit();
   });
 
@@ -2001,10 +2072,15 @@
     }
     showScreen('mp-role');
   }
+  function nextPhaseAfterReveal(){
+    if(mp.players.some(p=>p.role==='thief')) return 'thief';
+    if(mp.players.some(p=>p.role==='cupid')) return 'cupid';
+    return 'night-wolf';
+  }
   document.getElementById('btnMpRoleContinue').addEventListener('click', async ()=>{
     // le premier qui clique fait avancer si tout le monde a vu (simplifié: hôte avance dès que prêt)
     if(mp.isHost){
-      await db.collection(ROOMS).doc(mp.code).update({ phase:'night-wolf' });
+      await db.collection(ROOMS).doc(mp.code).update({ phase: nextPhaseAfterReveal() });
     } else {
       showScreen('mp-wait');
       document.getElementById('mpWaitTitle').textContent = '🌙 En attente';
@@ -2024,13 +2100,126 @@
     return div;
   }
 
+  // ---------- Voleur (avant la nuit 1) ----------
+  function renderThief(){
+    const my = me();
+    const thiefPlayer = mp.players.find(p=>p.role==='thief');
+    if(!thiefPlayer || my.id!==thiefPlayer.id){
+      showScreen('mp-wait');
+      document.getElementById('mpWaitTitle').textContent = '🗡️ Le voleur choisit';
+      document.getElementById('mpWaitText').textContent = 'Le voleur regarde les cartes mises de côté…';
+      const advBtn = document.getElementById('btnMpHostAdvance');
+      if(mp.isHost){ advBtn.classList.remove('hidden'); advBtn.onclick = ()=> advanceThiefPhase(); }
+      else advBtn.classList.add('hidden');
+      return;
+    }
+    const extra = mp.room.thiefExtra || ['villager','villager'];
+    const title = document.getElementById('mpNightTitle');
+    const sub = document.getElementById('mpNightSub');
+    const grid = document.getElementById('mpNightVillagers');
+    const confirmBtn = document.getElementById('btnMpNightConfirm');
+    const skipBtn = document.getElementById('btnMpNightSkip');
+    title.textContent = '🗡️ Le voleur';
+    const bothWolves = extra[0]==='wolf' && extra[1]==='wolf';
+    sub.textContent = bothWolves
+      ? "Les deux cartes mises de côté sont des loups-garous — tu dois en prendre une."
+      : "Voici les deux cartes mises de côté. Prends-en une, ou garde ta carte de Voleur (tu deviens alors simple villageois).";
+    grid.innerHTML='';
+    let chosen = null;
+    extra.forEach((role)=>{
+      const meta = ROLE_META[role];
+      const div = document.createElement('div');
+      div.className = 'villager selectable';
+      div.innerHTML = `<span class="avatar">${meta.icon}</span><div class="name">${meta.name}</div>`;
+      div.addEventListener('click', ()=>{
+        chosen = role;
+        [...grid.children].forEach(c=>c.classList.remove('selected'));
+        div.classList.add('selected');
+        confirmBtn.disabled = false;
+      });
+      grid.appendChild(div);
+    });
+    confirmBtn.classList.remove('hidden'); confirmBtn.textContent = 'Prendre cette carte'; confirmBtn.disabled = true;
+    confirmBtn.onclick = async ()=>{
+      await db.collection(ROOMS).doc(mp.code).collection('players').doc(my.id).update({ role: chosen });
+      if(mp.isHost) advanceThiefPhase(); else waitForOthers('thief');
+    };
+    if(bothWolves){
+      skipBtn.classList.add('hidden');
+    } else {
+      skipBtn.classList.remove('hidden');
+      skipBtn.textContent = 'Garder ma carte de Voleur';
+      skipBtn.onclick = async ()=>{
+        await db.collection(ROOMS).doc(mp.code).collection('players').doc(my.id).update({ role:'villager' });
+        if(mp.isHost) advanceThiefPhase(); else waitForOthers('thief');
+      };
+    }
+    showScreen('mp-night');
+  }
+  async function advanceThiefPhase(){
+    if(!mp.isHost) return;
+    const next = mp.players.some(p=>p.role==='cupid') ? 'cupid' : 'night-wolf';
+    await db.collection(ROOMS).doc(mp.code).update({ phase: next });
+  }
+
+  // ---------- Cupidon (nuit 1 uniquement) ----------
+  function renderCupid(){
+    const my = me();
+    const cupidPlayer = mp.players.find(p=>p.role==='cupid');
+    if(!cupidPlayer || my.id!==cupidPlayer.id){
+      showScreen('mp-wait');
+      document.getElementById('mpWaitTitle').textContent = '💘 Cupidon choisit';
+      document.getElementById('mpWaitText').textContent = 'Cupidon désigne deux amoureux…';
+      const advBtn = document.getElementById('btnMpHostAdvance');
+      if(mp.isHost){ advBtn.classList.remove('hidden'); advBtn.onclick = ()=> advanceCupidPhase(mp.room.lovers||[]); }
+      else advBtn.classList.add('hidden');
+      return;
+    }
+    const title = document.getElementById('mpNightTitle');
+    const sub = document.getElementById('mpNightSub');
+    const grid = document.getElementById('mpNightVillagers');
+    const confirmBtn = document.getElementById('btnMpNightConfirm');
+    const skipBtn = document.getElementById('btnMpNightSkip');
+    title.textContent = '💘 Cupidon';
+    sub.textContent = "Choisis deux joueurs (toi y compris) qui tomberont amoureux. S'ils meurent, ils meurent ensemble — et s'ils restent les deux derniers en vie, ils gagnent ensemble.";
+    grid.innerHTML='';
+    let picked = (mp.room.lovers && mp.room.lovers.length===2) ? mp.room.lovers.slice() : [];
+    const pool = alivePlayers();
+    function refreshSelection(){
+      [...grid.children].forEach((c,idx)=>{
+        c.classList.toggle('selected', picked.includes(pool[idx].id));
+      });
+      confirmBtn.disabled = picked.length!==2;
+    }
+    pool.forEach(p=>{
+      const card = villagerCard(p, {selected: picked.includes(p.id)});
+      card.addEventListener('click', ()=>{
+        if(picked.includes(p.id)) picked = picked.filter(id=>id!==p.id);
+        else if(picked.length<2) picked.push(p.id);
+        refreshSelection();
+      });
+      grid.appendChild(card);
+    });
+    confirmBtn.classList.remove('hidden'); confirmBtn.textContent = 'Confirmer les amoureux'; confirmBtn.disabled = picked.length!==2;
+    confirmBtn.onclick = async ()=>{
+      if(mp.isHost) advanceCupidPhase(picked);
+      else { await db.collection(ROOMS).doc(mp.code).update({lovers:picked}); waitForOthers('cupid'); }
+    };
+    skipBtn.classList.add('hidden');
+    showScreen('mp-night');
+  }
+  async function advanceCupidPhase(lovers){
+    if(!mp.isHost) return;
+    await db.collection(ROOMS).doc(mp.code).update({ lovers: lovers, phase: 'night-wolf' });
+  }
+
   function renderNightSubphase(role){
     const my = me();
     const actingNow = my.alive && my.role===role;
     if(!actingNow){
       showScreen('mp-wait');
       document.getElementById('mpWaitTitle').textContent = '🌑 Nuit tombée';
-      const label = role==='wolf' ? 'Le loup-garou choisit sa proie…' : role==='seer' ? 'La voyante sonde quelqu\'un…' : 'La sorcière prépare ses potions…';
+      const label = role==='wolf' ? 'Le loup-garou choisit sa proie…' : role==='littlegirl' ? 'La Petite Fille jette un œil…' : role==='seer' ? 'La voyante sonde quelqu\'un…' : 'La sorcière prépare ses potions…';
       document.getElementById('mpWaitText').textContent = label;
       const advBtn = document.getElementById('btnMpHostAdvance');
       if(mp.isHost){
@@ -2060,6 +2249,44 @@
         grid.appendChild(card);
       });
       confirmBtn.classList.add('hidden'); skipBtn.classList.add('hidden');
+    } else if(role==='littlegirl'){
+      title.textContent = '👧 Nuit tombée';
+      sub.textContent = 'Les loups discutent tout près. Veux-tu risquer un œil pour tenter de les repérer ?';
+      const already = my.nightAction && my.nightAction.lgDone;
+      if(already){
+        const wolves = mp.players.filter(p=>p.role==='wolf');
+        const result = document.createElement('div');
+        result.className='log';
+        if(my.nightAction.lgCaught){
+          result.innerHTML = `<p>Tu t'es fait repérer par les loups... 😱</p>`;
+        } else if(my.nightAction.lgSpied){
+          result.innerHTML = `<p>Tu aperçois discrètement : ${wolves.map(w=>escapeHtml(w.name)).join(', ')}.</p>`;
+        } else {
+          result.innerHTML = `<p>Tu préfères rester bien cachée sous tes couvertures.</p>`;
+        }
+        grid.appendChild(result);
+      } else {
+        const spyBtn = document.createElement('button');
+        spyBtn.className='btn btn-ghost';
+        spyBtn.textContent = '👁️ Espionner discrètement (risqué)';
+        spyBtn.addEventListener('click', async ()=>{
+          const caught = Math.random() < 0.2;
+          await updateMyNightAction({lgDone:true, lgSpied:true, lgCaught:caught});
+        });
+        grid.appendChild(spyBtn);
+        const hideBtn = document.createElement('button');
+        hideBtn.className='btn btn-ghost';
+        hideBtn.style.marginTop='10px';
+        hideBtn.textContent = 'Rester cachée';
+        hideBtn.addEventListener('click', async ()=>{
+          await updateMyNightAction({lgDone:true, lgSpied:false, lgCaught:false});
+        });
+        grid.appendChild(hideBtn);
+      }
+      confirmBtn.classList.remove('hidden'); confirmBtn.textContent='Continuer';
+      confirmBtn.disabled = !already;
+      confirmBtn.onclick = ()=>{ if(mp.isHost) advanceNightPhase('littlegirl', true); else waitForOthers('littlegirl'); };
+      skipBtn.classList.add('hidden');
     } else if(role==='seer'){
       title.textContent = '🔮 Vision nocturne';
       sub.textContent = 'Choisis quelqu\'un à sonder cette nuit.';
@@ -2148,16 +2375,29 @@
       wolves.forEach(w=>{ const t=w.nightAction && w.nightAction.wolfVote; if(t) tally[t]=(tally[t]||0)+1; });
       let victim=null, best=-1;
       Object.keys(tally).forEach(k=>{ if(tally[k]>best){ best=tally[k]; victim=k; } });
-      const next = livingWithRole('seer').length ? 'night-seer' : (livingWithRole('witch').length ? 'night-witch' : 'morning');
+      const next = livingWithRole('littlegirl').length ? 'night-littlegirl' : (livingWithRole('seer').length ? 'night-seer' : (livingWithRole('witch').length ? 'night-witch' : 'morning'));
       let update = { nightResult: Object.assign({}, mp.room.nightResult||{}, {pendingVictim: victim}), phase: next };
       if(next==='morning'){ update = Object.assign(update, await computeNightDeaths(victim, null, null)); }
+      await roomRef.update(update);
+    } else if(role==='littlegirl'){
+      const lg = livingWithRole('littlegirl')[0];
+      const caughtId = (lg && lg.nightAction && lg.nightAction.lgCaught) ? lg.id : null;
+      const next = livingWithRole('seer').length ? 'night-seer' : (livingWithRole('witch').length ? 'night-witch' : 'morning');
+      let update = { nightResult: Object.assign({}, mp.room.nightResult||{}, {pendingLittleGirlCaught: caughtId}), phase: next };
+      if(next==='morning'){
+        const victim = mp.room.nightResult && mp.room.nightResult.pendingVictim;
+        const extra = caughtId ? [{id:caughtId, cause:'exposed'}] : null;
+        update = Object.assign(update, await computeNightDeaths(victim, null, null, extra));
+      }
       await roomRef.update(update);
     } else if(role==='seer'){
       const next = livingWithRole('witch').length ? 'night-witch' : 'morning';
       let update = { phase: next };
       if(next==='morning'){
         const victim = mp.room.nightResult && mp.room.nightResult.pendingVictim;
-        update = Object.assign(update, await computeNightDeaths(victim, null, null));
+        const caughtId = mp.room.nightResult && mp.room.nightResult.pendingLittleGirlCaught;
+        const extra = caughtId ? [{id:caughtId, cause:'exposed'}] : null;
+        update = Object.assign(update, await computeNightDeaths(victim, null, null, extra));
       }
       await roomRef.update(update);
     } else if(role==='witch'){
@@ -2171,15 +2411,38 @@
           witchDeathUsed: witch.witchDeathUsed || !!poisoned
         });
       }
-      const update = await computeNightDeaths(victim, saved?victim:null, poisoned||null);
+      const caughtId = mp.room.nightResult && mp.room.nightResult.pendingLittleGirlCaught;
+      const extra = caughtId ? [{id:caughtId, cause:'exposed'}] : null;
+      const update = await computeNightDeaths(victim, saved?victim:null, poisoned||null, extra);
       await roomRef.update(update);
     }
   }
 
-  async function computeNightDeaths(victimId, savedId, poisonId){
-    const deaths = [];
+  // ---------- Amoureux (cupidon) : mort de chagrin en cascade ----------
+  function applyLoverDeaths(deaths){
+    const lovers = mp.room.lovers;
+    if(!lovers || lovers.length!==2) return deaths;
+    const result = deaths.slice();
+    const deadIds = result.map(d=>d.id);
+    lovers.forEach(id=>{
+      if(deadIds.includes(id)){
+        const partnerId = lovers.find(x=>x!==id);
+        const partnerPlayer = mp.players.find(p=>p.id===partnerId);
+        if(partnerId && partnerPlayer && partnerPlayer.alive && !deadIds.includes(partnerId)){
+          result.push({id:partnerId, cause:'heartbreak'});
+          deadIds.push(partnerId);
+        }
+      }
+    });
+    return result;
+  }
+
+  async function computeNightDeaths(victimId, savedId, poisonId, extraDeaths){
+    let deaths = [];
     if(victimId && victimId!==savedId) deaths.push({id:victimId, cause:'wolf'});
     if(poisonId) deaths.push({id:poisonId, cause:'poison'});
+    if(extraDeaths) deaths = deaths.concat(extraDeaths);
+    deaths = applyLoverDeaths(deaths);
     const roomRef = db.collection(ROOMS).doc(mp.code);
     for(const d of deaths){
       await roomRef.collection('players').doc(d.id).update({alive:false});
@@ -2197,6 +2460,12 @@
   }
 
   function checkWinner(alivePool){
+    const lovers = mp.room.lovers;
+    if(lovers && lovers.length===2 && alivePool.length===2){
+      const ids = alivePool.map(p=>p.id).slice().sort().join(',');
+      const loverIds = lovers.slice().sort().join(',');
+      if(ids===loverIds) return 'lovers';
+    }
     const wolves = alivePool.filter(p=>p.role==='wolf').length;
     const others = alivePool.filter(p=>p.role!=='wolf').length;
     if(wolves===0) return 'village';
@@ -2248,10 +2517,13 @@
     const roomRef = db.collection(ROOMS).doc(mp.code);
     const hunterId = mp.room.nightResult.pendingHunterId;
     await roomRef.collection('players').doc(hunterId).update({hunterUsed:true});
-    const deaths = (mp.room.nightResult.deaths||[]).slice();
+    let deaths = (mp.room.nightResult.deaths||[]).slice();
     if(targetId){
-      await roomRef.collection('players').doc(targetId).update({alive:false});
-      deaths.push({id:targetId, cause:'hunter'});
+      const shotDeaths = applyLoverDeaths([{id:targetId, cause:'hunter'}]);
+      for(const d of shotDeaths){
+        await roomRef.collection('players').doc(d.id).update({alive:false});
+      }
+      deaths = deaths.concat(shotDeaths);
     }
     const deadIds = deaths.map(d=>d.id);
     const stillAlive = mp.players.filter(p=>!deadIds.includes(p.id) && p.alive);
@@ -2273,7 +2545,7 @@
       deaths.forEach(d=>{
         const p = mp.players.find(x=>x.id===d.id);
         if(!p) return;
-        const cause = d.cause==='wolf' ? 'dévoré par le loup-garou' : d.cause==='poison' ? 'empoisonné par la sorcière' : 'entraîné par le chasseur';
+        const cause = d.cause==='wolf' ? 'dévoré par le loup-garou' : d.cause==='poison' ? 'empoisonné par la sorcière' : d.cause==='heartbreak' ? 'mort de chagrin, le cœur brisé' : d.cause==='exposed' ? 'démasquée en espionnant les loups' : 'entraîné par le chasseur';
         const line = document.createElement('p');
         line.innerHTML = `<span class="tag">${escapeHtml(p.name)}</span> a été ${cause}.`;
         log.appendChild(line);
@@ -2335,12 +2607,18 @@
     const roomRef = db.collection(ROOMS).doc(mp.code);
     let update = { voteResult:{eliminatedId, tally} };
     if(eliminatedId){
-      await roomRef.collection('players').doc(eliminatedId).update({alive:false});
-      const elimPlayer = mp.players.find(p=>p.id===eliminatedId);
-      const stillAlive = mp.players.filter(p=>p.id!==eliminatedId && p.alive);
+      const deaths = applyLoverDeaths([{id:eliminatedId, cause:'vote'}]);
+      for(const d of deaths){
+        await roomRef.collection('players').doc(d.id).update({alive:false});
+      }
+      update.voteResult.heartbreakId = deaths.length>1 ? deaths[1].id : null;
+      const deadIds = deaths.map(d=>d.id);
+      const stillAlive = mp.players.filter(p=>!deadIds.includes(p.id) && p.alive);
       const win = checkWinner(stillAlive);
-      if(!win && elimPlayer && elimPlayer.role==='hunter' && !elimPlayer.hunterUsed){
-        update.nightResult = Object.assign({}, mp.room.nightResult||{}, {pendingHunterId:eliminatedId, pendingHunterSource:'day', deaths:[]});
+      const elimPlayer = mp.players.find(p=>p.id===eliminatedId);
+      const fallenHunter = deaths.map(d=>mp.players.find(p=>p.id===d.id)).find(p=>p && p.role==='hunter' && !p.hunterUsed);
+      if(!win && fallenHunter){
+        update.nightResult = Object.assign({}, mp.room.nightResult||{}, {pendingHunterId:fallenHunter.id, pendingHunterSource:'day', deaths:[]});
         update.phase = 'night-hunter';
       } else {
         update.phase = win ? 'end' : 'vote-result';
@@ -2362,6 +2640,10 @@
       const p = mp.players.find(x=>x.id===vr.eliminatedId);
       const meta = p ? ROLE_META[p.role] : null;
       log.innerHTML = `<p><span class="tag">${p?escapeHtml(p.name):'?'}</span> est banni par le village. Il était <b>${meta?meta.name:''}</b>.</p>`;
+      if(vr.heartbreakId){
+        const partner = mp.players.find(x=>x.id===vr.heartbreakId);
+        if(partner) log.innerHTML += `<p><span class="tag">${escapeHtml(partner.name)}</span> meurt de chagrin, le cœur brisé.</p>`;
+      }
     }
     (mp.room.nightResult && (mp.room.nightResult.deaths=[]));
     const btn = document.getElementById('btnMpVoteResultContinue');
@@ -2384,9 +2666,9 @@
     const icon = document.getElementById('mpEndIcon');
     const title = document.getElementById('mpEndTitle');
     const desc = document.getElementById('mpEndDesc');
-    icon.textContent = win==='wolves' ? '🐺' : '🏆';
-    title.textContent = win==='wolves' ? 'Victoire des loups' : 'Victoire du village';
-    desc.textContent = win==='wolves' ? "Les loups-garous ont pris le dessus sur le village." : "Le village a démasqué tous les loups-garous !";
+    icon.textContent = win==='wolves' ? '🐺' : win==='lovers' ? '💘' : '🏆';
+    title.textContent = win==='wolves' ? 'Victoire des loups' : win==='lovers' ? 'Victoire des amoureux' : 'Victoire du village';
+    desc.textContent = win==='wolves' ? "Les loups-garous ont pris le dessus sur le village." : win==='lovers' ? "Les amoureux ont survécu envers et contre tout, unis jusqu'au bout." : "Le village a démasqué tous les loups-garous !";
     const reveal = document.getElementById('mpEndReveal');
     reveal.innerHTML='';
     mp.players.forEach(p=>{
@@ -2410,7 +2692,7 @@
         role:null, alive:true, nightAction:{}, dayVote:null, hunterUsed:false, witchLifeUsed:false, witchDeathUsed:false
       });
     });
-    batch.update(roomRef, { phase:'lobby', dayNumber:0, winner:null, nightResult:{}, voteResult:{} });
+    batch.update(roomRef, { phase:'lobby', dayNumber:0, winner:null, nightResult:{}, voteResult:{}, lovers:null, thiefExtra:null });
     await batch.commit();
   });
 
