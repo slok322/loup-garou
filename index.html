@@ -1680,7 +1680,8 @@
   }catch(e){ console.warn('Firebase indisponible', e); db = null; }
 
   const ROOMS = 'lgRooms';
-  const AVATARS = ['🙂','😎','🧑‍🌾','🧙','🧑‍🚀','🥷','🧑‍🎤','🧑‍🍳','🧑‍🎨','🧑‍🔬','🧛','🧟','🦊','🐻','🐺','🐱'];
+  const AVATARS = ['🙂','😎','🧑‍🌾','🧙','🧑‍🚀','🥷','🧑‍🎤','🧑‍🍳','🧑‍🎨','🧑‍🔬','🧛','🧟','🦊','🐻','🐺','🐱',
+    '🐨','🐼','🦁','🐯','🐵','🦉','🐸','🦄','🧑‍🚒','🧑‍✈️','🧑‍🎓','🧑‍🌾','🧑‍💻','🧑‍🎤'];
   const ROLE_META = {
     wolf:    { icon:'🐺', name:'Loup-Garou', cls:'wolf',    desc:"Chaque nuit, entends-toi avec les autres loups pour choisir une victime. Le jour, fonds-toi dans la foule." },
     seer:    { icon:'🔮', name:'Voyante',    cls:'seer',    desc:"Chaque nuit, sonde un joueur pour découvrir son camp." },
@@ -1688,6 +1689,7 @@
     hunter:  { icon:'🏹', name:'Chasseur',   cls:'hunter',  desc:"Si tu meurs, tu tires une dernière flèche et emportes quelqu'un avec toi." },
     villager:{ icon:'🕯️', name:'Villageois', cls:'villager',desc:"Pas de pouvoir spécial. Observe, débat et vote pour démasquer le loup-garou." }
   };
+  const MAX_PLAYERS_LIMIT = 24;
 
   function rid(){ return Math.random().toString(36).slice(2,10); }
   function roomCode(){ let s=''; const L='ABCDEFGHJKLMNPQRSTUVWXYZ'; for(let i=0;i<4;i++) s+=L[Math.floor(Math.random()*L.length)]; return s; }
@@ -1720,15 +1722,20 @@
 
   function me(){ return mp.players.find(p=>p.id===mp.uid); }
   function alivePlayers(){ return mp.players.filter(p=>p.alive); }
-  function roleCountFor(n){
+  function defaultSettingsFor(n){
     const wolves = n<=6 ? 1 : (n<=9 ? 2 : 3);
     return {
+      maxPlayers: 16,
       wolf: wolves,
       seer: n>=5 ? 1:0,
       witch: n>=6 ? 1:0,
       hunter: n>=7 ? 1:0
     };
   }
+  function currentSettings(){
+    return Object.assign(defaultSettingsFor(mp.players.length), mp.room.settings||{});
+  }
+  function specialsTotal(s){ return s.wolf + s.seer + s.witch + s.hunter; }
 
   function screenById(id){ return document.getElementById('screen-'+id); }
   function showScreen(id){
@@ -1755,7 +1762,8 @@
       while(tries<8 && (await db.collection(ROOMS).doc(code).get()).exists);
       const uid = myUid(code);
       await db.collection(ROOMS).doc(code).set({
-        phase:'lobby', hostId:uid, dayNumber:0, createdAt:Date.now(), winner:null
+        phase:'lobby', hostId:uid, dayNumber:0, createdAt:Date.now(), winner:null,
+        settings: defaultSettingsFor(1)
       });
       await db.collection(ROOMS).doc(code).collection('players').doc(uid).set({
         name, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)],
@@ -1788,6 +1796,9 @@
       const existing = await roomRef.collection('players').doc(uid).get();
       if(!existing.exists){
         if(roomData.phase!=='lobby'){ mpError('mpHomeError','Cette partie a déjà commencé.'); return; }
+        const currentCount = (await roomRef.collection('players').get()).docs.length;
+        const maxP = (roomData.settings && roomData.settings.maxPlayers) || 16;
+        if(currentCount >= maxP){ mpError('mpHomeError',`Le salon est complet (${maxP} joueurs max).`); return; }
         const usedAvatars = (await roomRef.collection('players').get()).docs.map(d=>d.data().avatar);
         const freeAvatar = AVATARS.find(a=>!usedAvatars.includes(a)) || AVATARS[Math.floor(Math.random()*AVATARS.length)];
         await roomRef.collection('players').doc(uid).set({
@@ -1880,26 +1891,84 @@
       row.innerHTML = `<span class="avatar">${p.avatar}</span><span class="name">${escapeHtml(p.name)}</span>${p.isHost?'<span class="tag2">HÔTE</span>':''}`;
       list.appendChild(row);
     });
+
+    const s = currentSettings();
+    const n = mp.players.length;
+    const specials = specialsTotal(s);
+    const villagers = Math.max(0, n - specials);
+    const settingsEl = document.getElementById('mpHostSettings');
+    settingsEl.innerHTML='';
+
+    if(mp.isHost){
+      const wrap = document.createElement('div');
+      wrap.innerHTML = `<div class="eyebrow" style="margin-top:14px;">Paramètres de la partie</div>`;
+      settingsEl.appendChild(wrap);
+      settingsEl.appendChild(stepperRow('Places max du salon', s.maxPlayers, 4, MAX_PLAYERS_LIMIT, v=>updateSettings({maxPlayers:v})));
+      settingsEl.appendChild(stepperRow('🐺 Loups-garous', s.wolf, 1, Math.max(1, n-1), v=>updateSettings({wolf:v})));
+      settingsEl.appendChild(stepperRow('🔮 Voyantes', s.seer, 0, 2, v=>updateSettings({seer:v})));
+      settingsEl.appendChild(stepperRow('🧪 Sorcières', s.witch, 0, 2, v=>updateSettings({witch:v})));
+      settingsEl.appendChild(stepperRow('🏹 Chasseurs', s.hunter, 0, 2, v=>updateSettings({hunter:v})));
+      const note = document.createElement('p');
+      note.className='center-note';
+      note.textContent = `= ${villagers} villageois (${specials} cartes spéciales / ${n} joueurs)`;
+      settingsEl.appendChild(note);
+    } else {
+      const note = document.createElement('p');
+      note.className='center-note';
+      note.textContent = `Cartes : ${s.wolf} loup(s), ${s.seer} voyante(s), ${s.witch} sorcière(s), ${s.hunter} chasseur(s), ${villagers} villageois(es).`;
+      settingsEl.appendChild(note);
+    }
+
     const startBtn = document.getElementById('btnMpStartGame');
     const waitNote = document.getElementById('mpLobbyWaitNote');
     if(mp.isHost){
       startBtn.classList.remove('hidden'); waitNote.classList.add('hidden');
-      startBtn.disabled = mp.players.length < 4;
-      mpError('mpLobbyError', mp.players.length<4 ? `Il faut au moins 4 joueurs (${mp.players.length}/4).` : '');
+      let err = '';
+      if(n < 4) err = `Il faut au moins 4 joueurs (${n}/4).`;
+      else if(specials > n) err = `Trop de cartes spéciales (${specials}) pour ${n} joueur(s).`;
+      startBtn.disabled = !!err;
+      mpError('mpLobbyError', err);
     } else {
       startBtn.classList.add('hidden'); waitNote.classList.remove('hidden');
       mpError('mpLobbyError','');
     }
   }
 
+  function stepperRow(label, value, min, max, onChange){
+    const row = document.createElement('div');
+    row.className='settings-row';
+    row.innerHTML = `<span>${label}</span>`;
+    const btns = document.createElement('div');
+    btns.className='cnt-btns';
+    const minusBtn = document.createElement('button');
+    minusBtn.className='cnt-btn'; minusBtn.textContent='–'; minusBtn.disabled = value<=min;
+    minusBtn.addEventListener('click', ()=> onChange(Math.max(min, value-1)));
+    const valEl = document.createElement('span');
+    valEl.style.minWidth='18px'; valEl.style.textAlign='center'; valEl.style.fontWeight='700';
+    valEl.textContent = value;
+    const plusBtn = document.createElement('button');
+    plusBtn.className='cnt-btn'; plusBtn.textContent='+'; plusBtn.disabled = value>=max;
+    plusBtn.addEventListener('click', ()=> onChange(Math.min(max, value+1)));
+    btns.appendChild(minusBtn); btns.appendChild(valEl); btns.appendChild(plusBtn);
+    row.appendChild(btns);
+    return row;
+  }
+
+  async function updateSettings(patch){
+    if(!mp.isHost) return;
+    const merged = Object.assign(currentSettings(), patch);
+    await db.collection(ROOMS).doc(mp.code).update({ settings: merged });
+  }
+
   document.getElementById('btnMpStartGame').addEventListener('click', async ()=>{
-    if(!mp.isHost || mp.players.length<4) return;
-    const counts = roleCountFor(mp.players.length);
+    const s = currentSettings();
+    const n = mp.players.length;
+    if(!mp.isHost || n<4 || specialsTotal(s) > n) return;
     let deck = [];
-    for(let i=0;i<counts.wolf;i++) deck.push('wolf');
-    for(let i=0;i<counts.seer;i++) deck.push('seer');
-    for(let i=0;i<counts.witch;i++) deck.push('witch');
-    for(let i=0;i<counts.hunter;i++) deck.push('hunter');
+    for(let i=0;i<s.wolf;i++) deck.push('wolf');
+    for(let i=0;i<s.seer;i++) deck.push('seer');
+    for(let i=0;i<s.witch;i++) deck.push('witch');
+    for(let i=0;i<s.hunter;i++) deck.push('hunter');
     while(deck.length < mp.players.length) deck.push('villager');
     deck = shuffle(deck);
     const batch = db.batch();
