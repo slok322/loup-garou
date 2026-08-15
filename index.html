@@ -308,6 +308,29 @@
     background:rgba(227,168,87,.16);
     color:var(--moon);
   }
+  .role-toggle-row{
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px;
+  }
+  .role-toggle-btn{
+    flex:1 1 calc(50% - 8px);
+    padding:11px 10px;
+    border-radius:12px;
+    border:1px solid rgba(238,241,248,.14);
+    background:rgba(255,255,255,.03);
+    color:var(--moon-dim);
+    font-size:13.5px;
+    font-weight:600;
+    font-family:var(--font-body);
+    cursor:pointer;
+    text-align:center;
+    transition:transform .12s ease, filter .12s ease, background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .role-toggle-btn:active{ transform:scale(.97); }
+  .role-toggle-btn.active{
+    border-color:var(--arcane);
+    background:rgba(138,111,214,.2);
+    color:var(--moon);
+  }
 
   .rule-row{
     display:flex; gap:12px; align-items:flex-start;
@@ -385,6 +408,7 @@
     <div class="brand">🌙 Nuit au Village</div>
     <div class="header-icons">
       <button class="sound-toggle" id="btnRules" aria-label="Règles du jeu">❓</button>
+      <button class="sound-toggle" id="btnGlobalMenu" aria-label="Retour au menu" style="display:none;">🏠</button>
       <button class="sound-toggle" id="btnSoundToggle" aria-label="Activer/couper le son">🔊</button>
       <div class="moon-phase" id="moonPhase"><div class="shadow"></div></div>
     </div>
@@ -396,13 +420,31 @@
     <section id="screen-home" class="card">
       <div class="eyebrow">Solo · vs Bots</div>
       <h1 class="hero">Un <em>loup-garou</em><br>rôde ce soir.</h1>
-      <p class="sub">Tu joues avec 5 villageois contrôlés par l'ordinateur. Un rôle t'est tiré au hasard : villageois, loup-garou, voyante, sorcière ou chasseur. Survis — ou dévore — jusqu'à l'aube.</p>
+      <p class="sub">Tu joues avec des villageois contrôlés par l'ordinateur. Un rôle t'est tiré au hasard parmi toutes les cartes du village : villageois, loup-garou, voyante, sorcière, chasseur, cupidon, voleur ou petite fille (les cartes spéciales apparaissent selon le nombre de joueurs). Survis — ou dévore — jusqu'à l'aube.</p>
+      <div class="eyebrow">Nombre de bots</div>
+      <div class="settings-row" style="padding:0 0 18px;">
+        <span id="botCountLabel" style="font-weight:700;font-size:15px;">5 bots (6 joueurs)</span>
+        <div class="cnt-btns">
+          <button class="cnt-btn" id="botMinus" type="button">–</button>
+          <button class="cnt-btn" id="botPlus" type="button">+</button>
+        </div>
+      </div>
       <div class="eyebrow">Difficulté</div>
       <div class="diff-row" id="diffRow">
         <button class="diff-btn" data-diff="easy">Facile</button>
         <button class="diff-btn active" data-diff="normal">Normal</button>
         <button class="diff-btn" data-diff="hard">Difficile</button>
       </div>
+      <div class="eyebrow">Cartes spéciales</div>
+      <div class="role-toggle-row" id="roleToggleRow">
+        <button class="role-toggle-btn active" type="button" data-role="seer">🔮 Voyante</button>
+        <button class="role-toggle-btn active" type="button" data-role="witch">🧪 Sorcière</button>
+        <button class="role-toggle-btn active" type="button" data-role="hunter">🏹 Chasseur</button>
+        <button class="role-toggle-btn active" type="button" data-role="cupid">💘 Cupidon</button>
+        <button class="role-toggle-btn active" type="button" data-role="thief">🗡️ Voleur</button>
+        <button class="role-toggle-btn active" type="button" data-role="littlegirl">👧 Petite Fille</button>
+      </div>
+      <p class="potion-note" style="margin-bottom:18px;">🐺 Le loup-garou est toujours en jeu. S'il y a plus de cartes cochées que de joueurs, certaines sont ignorées au hasard.</p>
       <button class="btn btn-primary" id="btnStart">Commencer la partie</button>
       <p class="stats-line" id="statsLine"></p>
       <div class="reveal-list hidden" id="statsByRole"></div>
@@ -510,7 +552,7 @@
     <section id="screen-rules" class="card hidden">
       <div class="eyebrow">Comment jouer</div>
       <h1 class="hero" style="font-size:28px;">Les rôles</h1>
-      <p class="sub">En mode entre amis, la toute première nuit commence par le voleur puis cupidon, avant l'ordre habituel : loup-garou → petite fille → voyante → sorcière → (chasseur, si besoin). Le jour, tout le monde débat puis vote pour bannir un suspect. Le village gagne si tous les loups sont éliminés ; les loups gagnent s'ils sont à égalité ou en surnombre face au reste du village. Les amoureux de cupidon gagnent ensemble s'ils sont les deux derniers survivants.</p>
+      <p class="sub">Selon le nombre de joueurs, des cartes spéciales supplémentaires rejoignent la partie : cupidon (à partir de 5 joueurs), petite fille (à partir de 6) et voleur (à partir de 7, avec deux cartes en plus mises de côté). La toute première nuit commence alors par le voleur puis cupidon, avant l'ordre habituel : loup-garou → petite fille → voyante → sorcière → (chasseur, si besoin). Le jour, tout le monde débat puis vote pour bannir un suspect. Le village gagne si tous les loups sont éliminés ; les loups gagnent s'ils sont à égalité ou en surnombre face au reste du village. Les amoureux de cupidon gagnent ensemble s'ils sont les deux derniers survivants.</p>
       <div class="rule-row">
         <div class="rule-icon">🐺</div>
         <div>
@@ -550,21 +592,21 @@
         <div class="rule-icon">💘</div>
         <div>
           <div class="rule-name cupid">Cupidon</div>
-          <div class="rule-desc">Uniquement en mode entre amis. La toute première nuit, désigne deux amoureux (qui peuvent l'inclure). S'ils meurent, ils meurent tous les deux ; s'ils restent les deux derniers en vie, ils gagnent ensemble, quel que soit leur camp.</div>
+          <div class="rule-desc">La toute première nuit, désigne deux amoureux (qui peuvent l'inclure). S'ils meurent, ils meurent tous les deux ; s'ils restent les deux derniers en vie, ils gagnent ensemble, quel que soit leur camp.</div>
         </div>
       </div>
       <div class="rule-row">
         <div class="rule-icon">🗡️</div>
         <div>
           <div class="rule-name thief">Voleur</div>
-          <div class="rule-desc">Uniquement en mode entre amis. Avant la première nuit, découvre deux cartes mises de côté et peut échanger sa carte contre l'une d'elles — sauf si les deux sont des loups-garous, où l'échange est obligatoire.</div>
+          <div class="rule-desc">Avant la première nuit, découvre deux cartes mises de côté et peut échanger sa carte contre l'une d'elles — sauf si les deux sont des loups-garous, où l'échange est obligatoire.</div>
         </div>
       </div>
       <div class="rule-row">
         <div class="rule-icon">👧</div>
         <div>
           <div class="rule-name littlegirl">Petite Fille</div>
-          <div class="rule-desc">Uniquement en mode entre amis. Pendant le tour des loups, peut risquer un œil pour tenter de les repérer — au risque de se faire surprendre et démasquer.</div>
+          <div class="rule-desc">Pendant le tour des loups, peut risquer un œil pour tenter de les repérer — au risque de se faire surprendre et démasquer.</div>
         </div>
       </div>
       <button class="btn btn-primary" id="btnRulesClose" style="margin-top:16px;">Retour</button>
@@ -615,6 +657,33 @@
       <div class="villagers" id="witchVillagers"></div>
       <div class="potion-note" id="witchDeathNote"></div>
       <button class="btn btn-primary" id="btnWitchConfirm">Continuer</button>
+    </section>
+
+    <!-- ÉCRAN 3d-bis : AVANT LA NUIT 1 — VOLEUR -->
+    <section id="screen-thief" class="card hidden">
+      <div class="phase-title">🗡️ Avant que la nuit tombe</div>
+      <div class="phase-sub" id="thiefSub">Voici les deux cartes mises de côté.</div>
+      <div class="villagers" id="thiefCards"></div>
+      <button class="btn btn-primary" id="btnThiefConfirm" disabled>Prendre cette carte</button>
+      <button class="btn btn-ghost" id="btnThiefSkip">Garder ma carte de Voleur</button>
+    </section>
+
+    <!-- ÉCRAN 3d-ter : NUIT 1 — CUPIDON -->
+    <section id="screen-cupid" class="card hidden">
+      <div class="phase-title">💘 Cupidon frappe</div>
+      <div class="phase-sub">Choisis deux joueurs (toi y compris) qui tomberont amoureux.</div>
+      <div class="villagers" id="cupidVillagers"></div>
+      <button class="btn btn-primary" id="btnCupidConfirm" disabled>Confirmer les amoureux</button>
+    </section>
+
+    <!-- ÉCRAN 3d-quater : NUIT — PETITE FILLE -->
+    <section id="screen-littlegirl" class="card hidden">
+      <div class="phase-title">👧 Nuit tombée</div>
+      <div class="phase-sub">Les loups discutent tout près. Veux-tu risquer un œil pour tenter de les repérer ?</div>
+      <div class="log hidden" id="littlegirlResult"></div>
+      <button class="btn btn-ghost" id="btnLittleGirlSpy">👁️ Espionner discrètement (risqué)</button>
+      <button class="btn btn-ghost" id="btnLittleGirlHide" style="margin-top:10px;">Rester cachée</button>
+      <button class="btn btn-primary hidden" id="btnLittleGirlConfirm" style="margin-top:16px;">Continuer</button>
     </section>
 
     <!-- ÉCRAN 3e : DERNIÈRE FLÈCHE DU CHASSEUR -->
@@ -680,7 +749,7 @@
 
   // ---------- Écrans ----------
   const screens = {};
-  ['home','rules','role','night','night-wait','seer','witch','hunter','morning','day','vote-result','end',
+  ['home','rules','role','thief','cupid','night','night-wait','littlegirl','seer','witch','hunter','morning','day','vote-result','end',
    'mp-home','mp-lobby','mp-role','mp-night','mp-wait','mp-morning','mp-day','mp-vote-result','mp-end'].forEach(id=>{
     screens[id] = document.getElementById('screen-'+id);
   });
@@ -692,6 +761,8 @@
     // relance l'animation d'entrée à chaque affichage
     void target.offsetWidth;
     target.classList.add('entering');
+    const menuBtn = document.getElementById('btnGlobalMenu');
+    if(menuBtn) menuBtn.style.display = (id==='home' || id==='rules' || id.indexOf('mp-')===0) ? 'none' : '';
   }
 
   const moonPhaseEl = document.getElementById('moonPhase');
@@ -783,6 +854,9 @@
 
   let players = [];   // {id, name, avatar, alive, role, isYou, usedLife, usedDeath}
   let dayCount = 1;
+  let botCount = 5;
+  let thiefExtra = null;   // [role, role] — cartes mises de côté, si le voleur est en jeu
+  let lovers = null;       // [id, id] — les deux amoureux désignés par cupidon
   let selectedNightTarget = null;
   let selectedVoteTarget = null;
   let selectedSeerTarget = null;
@@ -791,9 +865,27 @@
   let witchSavePending = false;
   let nightState = {};
 
-  const ROLE_LABEL = {wolf:'le loup-garou', seer:'la voyante', witch:'la sorcière', hunter:'le chasseur', villager:'un simple villageois'};
-  const ROLE_ICON = {wolf:'🐺', seer:'🔮', witch:'🧪', hunter:'🏹', villager:'🕯️'};
-  const DEATH_CAUSE_LABEL = {wolf:'dévoré par le loup', poison:'empoisonné', hunter:'emporté par le chasseur', vote:'banni par le village'};
+  const ROLE_ICON = {wolf:'🐺', seer:'🔮', witch:'🧪', hunter:'🏹', cupid:'💘', thief:'🗡️', littlegirl:'👧', villager:'🕯️'};
+  const ROLE_LABEL = {wolf:'le loup-garou', seer:'la voyante', witch:'la sorcière', hunter:'le chasseur', cupid:'cupidon', thief:'le voleur', littlegirl:'la petite fille', villager:'un simple villageois'};
+  const DEATH_CAUSE_LABEL = {wolf:'dévoré par le loup', poison:'empoisonné', hunter:'emporté par le chasseur', vote:'banni par le village', heartbreak:'mort de chagrin', exposed:'démasquée en espionnant les loups'};
+
+  // --- Cartes spéciales choisies pour la partie solo (loup-garou toujours inclus) ---
+  const SPECIAL_ROLE_KEYS = ['seer','witch','hunter','cupid','thief','littlegirl'];
+  let selectedRoles = {seer:true, witch:true, hunter:true, cupid:true, thief:true, littlegirl:true};
+  const roleToggleRow = document.getElementById('roleToggleRow');
+  function renderRoleToggles(){
+    [...roleToggleRow.children].forEach(btn=>{
+      btn.classList.toggle('active', !!selectedRoles[btn.dataset.role]);
+    });
+  }
+  roleToggleRow.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.role-toggle-btn');
+    if(!btn) return;
+    const role = btn.dataset.role;
+    selectedRoles[role] = !selectedRoles[role];
+    btn.classList.toggle('active', selectedRoles[role]);
+    savePrefs();
+  });
 
   // --- Système de soupçons (fait "réfléchir" les bots) ---
   let suspicion = {};
@@ -880,15 +972,32 @@
 
   function newGame(){
     dayCount = 1;
-    const names = shuffle(BOT_NAMES).slice(0,5);
-    const avatars = shuffle(AVATARS).slice(0,5);
+    const names = shuffle(BOT_NAMES).slice(0, botCount);
+    const avatars = shuffle(AVATARS).slice(0, botCount);
     players = [{id:'you', name:'Toi', avatar:'🙂', alive:true, role:'villager', isYou:true, usedLife:false, usedDeath:false, deathCause:null}];
     names.forEach((n,i)=>{
       players.push({id:'bot'+i, name:n, avatar:avatars[i], alive:true, role:'villager', isYou:false, usedLife:false, usedDeath:false, deathCause:null});
     });
-    // Répartition des rôles : 1 loup-garou, 1 voyante, 1 sorcière, 1 chasseur, 2 villageois
-    const roles = shuffle(['wolf','seer','witch','hunter','villager','villager']);
+
+    // Composition des cartes : le loup-garou est toujours présent, les autres selon ce que le joueur a coché.
+    const total = players.length;
+    let pool = ['wolf'];
+    SPECIAL_ROLE_KEYS.forEach(r=>{ if(selectedRoles[r]) pool.push(r); });
+    while(pool.length < total) pool.push('villager');
+    const deck = shuffle(pool);
+    const roles = deck.slice(0, total);
     players.forEach((p,i)=>{ p.role = roles[i]; });
+
+    thiefExtra = null;
+    if(roles.includes('thief')){
+      // Pas de 'wolf' ici (contrairement au mode entre amis) : le moteur solo ne gère qu'un seul
+      // loup-garou, un deuxième casserait la condition de victoire et l'IA du loup.
+      const extraPool = ['villager','villager'];
+      if(selectedRoles.seer) extraPool.push('seer');
+      if(selectedRoles.witch) extraPool.push('witch');
+      thiefExtra = [extraPool[Math.floor(Math.random()*extraPool.length)], extraPool[Math.floor(Math.random()*extraPool.length)]];
+    }
+    lovers = null;
 
     suspicion = {};
     players.forEach(p=>{ suspicion[p.id] = 0; });
@@ -907,8 +1016,8 @@
     const icon = document.getElementById('roleIcon');
     const name = document.getElementById('roleName');
     const desc = document.getElementById('roleDesc');
-    icon.classList.remove('wolf','villager','seer','witch','hunter');
-    name.classList.remove('wolf','villager','seer','witch','hunter');
+    icon.classList.remove('wolf','villager','seer','witch','hunter','cupid','thief','littlegirl');
+    name.classList.remove('wolf','villager','seer','witch','hunter','cupid','thief','littlegirl');
     icon.classList.add(y.role);
     name.classList.add(y.role);
     if(y.role==='wolf'){
@@ -927,6 +1036,18 @@
       icon.textContent = '🏹';
       name.textContent = 'Chasseur';
       desc.textContent = 'Tu n\'as pas de pouvoir la nuit. Mais si tu meurs — dévoré ou banni — tu peux tirer une dernière flèche et emporter quelqu\'un avec toi.';
+    } else if(y.role==='cupid'){
+      icon.textContent = '💘';
+      name.textContent = 'Cupidon';
+      desc.textContent = 'Avant la première nuit, tu désignes deux amoureux (toi y compris, si tu veux). S\'ils meurent, ils meurent tous les deux — et s\'ils restent les deux derniers en vie, ils gagnent ensemble.';
+    } else if(y.role==='thief'){
+      icon.textContent = '🗡️';
+      name.textContent = 'Voleur';
+      desc.textContent = 'Avant la première nuit, tu regardes deux cartes mises de côté et peux échanger ta carte contre l\'une d\'elles.';
+    } else if(y.role==='littlegirl'){
+      icon.textContent = '👧';
+      name.textContent = 'Petite Fille';
+      desc.textContent = 'Pendant que le loup-garou choisit sa victime, tu peux risquer un œil pour tenter de le repérer — au risque de te faire surprendre.';
     } else {
       icon.textContent = '🕯️';
       name.textContent = 'Villageois';
@@ -969,11 +1090,136 @@
     });
   }
 
+  // ---------- Avant la nuit 1 : voleur puis cupidon ----------
+  const ROLE_NAME_SOLO = {wolf:'Loup-Garou', seer:'Voyante', witch:'Sorcière', hunter:'Chasseur', cupid:'Cupidon', thief:'Voleur', littlegirl:'Petite Fille', villager:'Villageois'};
+
+  function proceedPreNight(){
+    if(thiefExtra){ proceedThiefStep(); }
+    else if(players.some(p=>p.role==='cupid')){ proceedCupidStep(); }
+    else { startNight(); }
+  }
+
+  function proceedAfterThief(){
+    if(players.some(p=>p.role==='cupid')) proceedCupidStep();
+    else startNight();
+  }
+
+  function proceedThiefStep(){
+    const y = you();
+    if(y.alive && y.role === 'thief'){
+      renderThiefScreen();
+    } else {
+      autoThiefDecision();
+      proceedAfterThief();
+    }
+  }
+
+  function autoThiefDecision(){
+    const thief = players.find(p=>p.role==='thief' && !p.isYou);
+    if(!thief || !thiefExtra) return;
+    const bothWolves = thiefExtra[0]==='wolf' && thiefExtra[1]==='wolf';
+    const nonVillager = thiefExtra.filter(r=>r!=='villager');
+    if(bothWolves){
+      thief.role = thiefExtra[Math.floor(Math.random()*2)];
+    } else if(nonVillager.length && Math.random() < 0.7){
+      thief.role = nonVillager[Math.floor(Math.random()*nonVillager.length)];
+    } else {
+      thief.role = 'villager';
+    }
+  }
+
+  function renderThiefScreen(){
+    const grid = document.getElementById('thiefCards');
+    const sub = document.getElementById('thiefSub');
+    const confirmBtn = document.getElementById('btnThiefConfirm');
+    const skipBtn = document.getElementById('btnThiefSkip');
+    grid.innerHTML = '';
+    let chosen = null;
+    const bothWolves = thiefExtra[0]==='wolf' && thiefExtra[1]==='wolf';
+    sub.textContent = bothWolves
+      ? "Les deux cartes mises de côté sont des loups-garous — tu dois en prendre une."
+      : "Voici les deux cartes mises de côté. Prends-en une, ou garde ta carte de Voleur (tu deviens alors simple villageois).";
+    thiefExtra.forEach(role=>{
+      const div = document.createElement('div');
+      div.className = 'villager selectable';
+      const avatar = document.createElement('span'); avatar.className='avatar'; avatar.textContent = ROLE_ICON[role];
+      const name = document.createElement('div'); name.className='name'; name.textContent = ROLE_NAME_SOLO[role];
+      div.appendChild(avatar); div.appendChild(name);
+      div.addEventListener('click', ()=>{
+        chosen = role;
+        [...grid.children].forEach(c=>c.classList.remove('selected'));
+        div.classList.add('selected');
+        confirmBtn.disabled = false;
+      });
+      grid.appendChild(div);
+    });
+    confirmBtn.disabled = true;
+    confirmBtn.onclick = ()=>{
+      if(!chosen) return;
+      you().role = chosen;
+      proceedAfterThief();
+    };
+    skipBtn.classList.toggle('hidden', bothWolves);
+    skipBtn.onclick = ()=>{
+      you().role = 'villager';
+      proceedAfterThief();
+    };
+    show('thief');
+  }
+
+  function autoCupidPick(){
+    const pool = shuffle(players.map(p=>p.id));
+    lovers = pool.slice(0,2);
+  }
+
+  function proceedCupidStep(){
+    const y = you();
+    if(y.alive && y.role === 'cupid'){
+      renderCupidScreen();
+    } else {
+      autoCupidPick();
+      startNight();
+    }
+  }
+
+  let cupidPicked = [];
+  function renderCupidScreen(){
+    cupidPicked = [];
+    const grid = document.getElementById('cupidVillagers');
+    const confirmBtn = document.getElementById('btnCupidConfirm');
+    grid.innerHTML = '';
+    confirmBtn.disabled = true;
+    players.forEach(p=>{
+      const div = document.createElement('div');
+      div.className = 'villager selectable';
+      const avatar = document.createElement('span'); avatar.className='avatar'; avatar.textContent = p.avatar;
+      const name = document.createElement('div'); name.className='name'; name.textContent = p.isYou ? 'Toi' : p.name;
+      div.appendChild(avatar); div.appendChild(name);
+      div.addEventListener('click', ()=>{
+        if(cupidPicked.includes(p.id)){
+          cupidPicked = cupidPicked.filter(id=>id!==p.id);
+          div.classList.remove('selected');
+        } else if(cupidPicked.length < 2){
+          cupidPicked.push(p.id);
+          div.classList.add('selected');
+        }
+        confirmBtn.disabled = cupidPicked.length !== 2;
+      });
+      grid.appendChild(div);
+    });
+    show('cupid');
+  }
+  document.getElementById('btnCupidConfirm').addEventListener('click', ()=>{
+    if(cupidPicked.length !== 2) return;
+    lovers = cupidPicked.slice();
+    startNight();
+  });
+
   // ---------- Phase de nuit ----------
   function startNight(){
     setPhase(false);
     playHowl();
-    nightState = {victimId:null, savedByWitch:false, witchKillId:null};
+    nightState = {victimId:null, savedByWitch:false, witchKillId:null, littleGirlExposedId:null};
     selectedNightTarget = null;
     selectedSeerTarget = null;
     seerStage = 'select';
@@ -1013,7 +1259,7 @@
       show('night');
     } else {
       autoWolfPick();
-      proceedSeerStep();
+      proceedLittleGirlStep();
     }
   }
 
@@ -1035,8 +1281,62 @@
   document.getElementById('btnNightConfirm').addEventListener('click', ()=>{
     if(!selectedNightTarget) return;
     nightState.victimId = selectedNightTarget;
+    proceedLittleGirlStep();
+  });
+
+  // --- Étape 1bis : la petite fille (espionne les loups, au risque de se faire repérer) ---
+  function autoLittleGirlPeek(){
+    const lg = players.find(p=>p.role==='littlegirl' && p.alive && !p.isYou);
+    if(!lg) return;
+    if(Math.random() < 0.4 && Math.random() < 0.2){
+      nightState.littleGirlExposedId = lg.id;
+    }
+  }
+
+  let littleGirlCaught = false;
+  function proceedLittleGirlStep(){
+    const y = you();
+    if(y.alive && y.role === 'littlegirl'){
+      littleGirlCaught = false;
+      document.getElementById('littlegirlResult').classList.add('hidden');
+      document.getElementById('littlegirlResult').innerHTML = '';
+      document.getElementById('btnLittleGirlSpy').classList.remove('hidden');
+      document.getElementById('btnLittleGirlHide').classList.remove('hidden');
+      document.getElementById('btnLittleGirlConfirm').classList.add('hidden');
+      show('littlegirl');
+    } else {
+      autoLittleGirlPeek();
+      proceedSeerStep();
+    }
+  }
+  document.getElementById('btnLittleGirlSpy').addEventListener('click', ()=>{
+    const wolves = players.filter(p=>p.role==='wolf');
+    const caught = Math.random() < 0.2;
+    littleGirlCaught = caught;
+    const result = document.getElementById('littlegirlResult');
+    result.classList.remove('hidden');
+    result.innerHTML = caught
+      ? `<p>Tu t'es fait repérer par les loups... 😱</p>`
+      : `<p>Tu aperçois discrètement : ${wolves.map(w=>escapeHtmlSolo(w.name)).join(', ')}.</p>`;
+    document.getElementById('btnLittleGirlSpy').classList.add('hidden');
+    document.getElementById('btnLittleGirlHide').classList.add('hidden');
+    document.getElementById('btnLittleGirlConfirm').classList.remove('hidden');
+  });
+  document.getElementById('btnLittleGirlHide').addEventListener('click', ()=>{
+    const result = document.getElementById('littlegirlResult');
+    result.classList.remove('hidden');
+    result.innerHTML = `<p>Tu préfères rester bien cachée sous tes couvertures.</p>`;
+    document.getElementById('btnLittleGirlSpy').classList.add('hidden');
+    document.getElementById('btnLittleGirlHide').classList.add('hidden');
+    document.getElementById('btnLittleGirlConfirm').classList.remove('hidden');
+  });
+  document.getElementById('btnLittleGirlConfirm').addEventListener('click', ()=>{
+    if(littleGirlCaught) nightState.littleGirlExposedId = you().id;
     proceedSeerStep();
   });
+  function escapeHtmlSolo(str){
+    return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
 
   // --- Étape 2 : la voyante ---
   function proceedSeerStep(){
@@ -1197,8 +1497,27 @@
   // --- Résolution finale de la nuit ---
   let lastVictimName = null;
   let youDeathCause = null; // 'wolf' | 'poison' | 'hunter' | 'vote' | null
+  function applyLoverDeathsSolo(deaths){
+    if(!lovers || lovers.length!==2) return deaths;
+    const result = deaths.slice();
+    const deadIds = result.map(d=>d.player.id);
+    lovers.forEach(id=>{
+      if(deadIds.includes(id)){
+        const partnerId = lovers.find(x=>x!==id);
+        const partner = players.find(p=>p.id===partnerId);
+        if(partner && partner.alive && !deadIds.includes(partnerId)){
+          partner.alive = false;
+          partner.deathCause = 'heartbreak';
+          result.push({player:partner, cause:'heartbreak'});
+          deadIds.push(partnerId);
+        }
+      }
+    });
+    return result;
+  }
+
   function resolveNight(){
-    const deaths = [];
+    let deaths = [];
 
     if(nightState.victimId && !nightState.savedByWitch){
       const victim = players.find(p=>p.id===nightState.victimId);
@@ -1216,12 +1535,23 @@
         deaths.push({player:poisoned, cause:'poison'});
       }
     }
+    if(nightState.littleGirlExposedId){
+      const exposed = players.find(p=>p.id===nightState.littleGirlExposedId);
+      if(exposed && exposed.alive){
+        exposed.alive = false;
+        exposed.deathCause = 'exposed';
+        deaths.push({player:exposed, cause:'exposed'});
+      }
+    }
+
+    deaths = applyLoverDeathsSolo(deaths);
 
     // Un chasseur qui meurt cette nuit peut emporter quelqu'un avec lui
     const fallenHunter = deaths.map(d=>d.player).find(p=>p.role==='hunter');
     if(fallenHunter && fallenHunter.isYou){
       showHunterScreen(fallenHunter, (revengeTarget)=>{
         if(revengeTarget) deaths.push({player:revengeTarget, cause:'hunter'});
+        deaths = applyLoverDeathsSolo(deaths);
         finishNightResolution(deaths);
       });
     } else {
@@ -1231,6 +1561,7 @@
           revengeTarget.alive = false;
           revengeTarget.deathCause = 'hunter';
           deaths.push({player:revengeTarget, cause:'hunter'});
+          deaths = applyLoverDeathsSolo(deaths);
         }
       }
       finishNightResolution(deaths);
@@ -1253,6 +1584,10 @@
           p.innerHTML = `<span class="tag wolf">${d.player.isYou?'Toi':d.player.name}</span> a été retrouvé${d.player.isYou?'':''} sans vie — empoisonné${d.player.isYou?'':''} pendant la nuit.`;
         } else if(d.cause === 'hunter'){
           p.innerHTML = `Dans un dernier sursaut, le chasseur a entraîné <span class="tag wolf">${d.player.isYou?'toi':d.player.name}</span> avec lui.`;
+        } else if(d.cause === 'exposed'){
+          p.innerHTML = `<span class="tag wolf">${d.player.isYou?'Tu':d.player.name}</span> ${d.player.isYou?'t\'es fait':'s\'est fait'} surprendre à espionner les loups... et ne l'${d.player.isYou?'as':'a'} pas emporté au paradis.`;
+        } else if(d.cause === 'heartbreak'){
+          p.innerHTML = `Fou de chagrin d'avoir perdu son amoureux, <span class="tag wolf">${d.player.isYou?'toi':d.player.name}</span> ${d.player.isYou?'meurs':'meurt'} à son tour.`;
         } else {
           p.innerHTML = `Cette nuit, <span class="tag wolf">${d.player.isYou?'toi-même':d.player.name}</span> a été retrouvé${d.player.isYou?'':''}${'\u00A0'}sans vie à l'orée du village. Le loup-garou a encore frappé.`;
         }
@@ -1433,24 +1768,33 @@
     });
 
     const voteCount = votes[eliminatedId];
+    let extraDeaths = applyLoverDeathsSolo([{player:eliminated, cause:'vote'}]).filter(d=>d.player.id!==eliminatedId);
 
     if(eliminated.role === 'hunter' && eliminated.isYou){
       showHunterScreen(eliminated, (revengeTarget)=>{
-        finishVoteResolution(eliminated, voteCount, revengeTarget);
+        if(revengeTarget) extraDeaths = extraDeaths.concat(applyLoverDeathsSolo([{player:revengeTarget, cause:'hunter'}]).filter(d=>d.player.id!==revengeTarget.id));
+        finishVoteResolution(eliminated, voteCount, revengeTarget, extraDeaths);
       });
     } else {
       let revengeTarget = null;
       if(eliminated.role === 'hunter'){
         revengeTarget = pickHunterRevengeTarget(eliminated);
-        if(revengeTarget){ revengeTarget.alive = false; revengeTarget.deathCause = 'hunter'; }
+        if(revengeTarget){
+          revengeTarget.alive = false;
+          revengeTarget.deathCause = 'hunter';
+          extraDeaths = extraDeaths.concat(applyLoverDeathsSolo([{player:revengeTarget, cause:'hunter'}]).filter(d=>d.player.id!==revengeTarget.id));
+        }
       }
-      finishVoteResolution(eliminated, voteCount, revengeTarget);
+      finishVoteResolution(eliminated, voteCount, revengeTarget, extraDeaths);
     }
   }
 
-  function finishVoteResolution(eliminated, voteCount, revengeTarget){
+  function finishVoteResolution(eliminated, voteCount, revengeTarget, extraDeaths){
+    extraDeaths = extraDeaths || [];
     if(eliminated.isYou) youDeathCause = 'vote';
     else if(revengeTarget && revengeTarget.isYou) youDeathCause = 'hunter';
+    const heartbreakOnYou = extraDeaths.find(d=>d.player.isYou && d.cause==='heartbreak');
+    if(heartbreakOnYou) youDeathCause = 'heartbreak';
     const log = document.getElementById('voteLog');
     log.innerHTML = '';
     const p1 = document.createElement('p');
@@ -1468,6 +1812,13 @@
       p3.innerHTML = `Dans un dernier sursaut, le chasseur tire sa flèche et emporte <span class="tag wolf">${revengeTarget.isYou?'toi':revengeTarget.name}</span> avec lui.`;
       log.appendChild(p3);
     }
+    extraDeaths.forEach(d=>{
+      if(d.cause === 'heartbreak'){
+        const p4 = document.createElement('p');
+        p4.innerHTML = `Fou de chagrin d'avoir perdu son amoureux, <span class="tag wolf">${d.player.isYou?'toi':d.player.name}</span> ${d.player.isYou?'meurs':'meurt'} à son tour.`;
+        log.appendChild(p4);
+      }
+    });
 
     show('vote-result');
     playThud();
@@ -1482,6 +1833,8 @@
       let msg;
       if(youDeathCause === 'hunter'){
         msg = "Le chasseur banni t'a entraîné avec lui d'une dernière flèche. Ta partie s'arrête ici.";
+      } else if(youDeathCause === 'heartbreak'){
+        msg = "Le cœur brisé par la mort de ton amoureux, tu n'y survis pas. Ta partie s'arrête ici.";
       } else {
         msg = y.role === 'wolf' ? "Tu as été démasqué et banni. Le village l'emporte." : "Tu as été banni par erreur. Ta partie s'arrête ici.";
       }
@@ -1496,16 +1849,29 @@
   // ---------- Conditions de victoire ----------
   function checkWinCondition(){
     const alive = alivePlayers();
+    const y = you();
+
+    // Les amoureux de Cupidon, s'ils sont les deux derniers en vie, gagnent ensemble
+    if(lovers && lovers.length===2 && alive.length===2){
+      const ids = alive.map(p=>p.id).slice().sort().join(',');
+      const loverIds = lovers.slice().sort().join(',');
+      if(ids === loverIds){
+        const youAreLover = lovers.includes(y.id);
+        endGame(youAreLover, youAreLover
+          ? "Envers et contre tout, votre amour a survécu à la nuit. Vous gagnez ensemble !"
+          : "Les deux amoureux de Cupidon ont survécu à tout le monde et gagnent ensemble. Ta partie s'arrête ici.");
+        return true;
+      }
+    }
+
     const wolfAlive = alive.some(p=>p.role==='wolf');
     const villagersAlive = alive.filter(p=>p.role!=='wolf').length;
 
     if(!wolfAlive){
-      const y = you();
       endGame(y.role !== 'wolf', y.role === 'wolf' ? "Le loup-garou (toi) a été éliminé. Le village triomphe." : "Le loup-garou a été éliminé. Le village triomphe — bien joué !");
       return true;
     }
     if(villagersAlive <= 1){ // le loup égale ou dépasse le reste
-      const y = you();
       endGame(y.role === 'wolf', y.role === 'wolf' ? "Il ne reste plus assez de villageois pour t'arrêter. Le loup-garou (toi) a gagné !" : "Le loup-garou a pris le dessus sur le village. Défaite…");
       return true;
     }
@@ -1592,7 +1958,7 @@
       resetBtn.classList.remove('hidden');
       if(byRoleEl){
         byRoleEl.innerHTML = '';
-        ['wolf','seer','witch','hunter','villager'].forEach(role=>{
+        ['wolf','seer','witch','hunter','cupid','thief','littlegirl','villager'].forEach(role=>{
           const r = stats.byRole[role];
           if(!r || r.games === 0) return;
           const row = document.createElement('div');
@@ -1630,6 +1996,27 @@
     catch(e){ /* stockage indisponible : l'historique ne survivra pas à cette session */ }
   }
 
+  const BOT_COUNT_MIN = 3, BOT_COUNT_MAX = 8;
+  function updateBotCountLabel(){
+    const label = document.getElementById('botCountLabel');
+    if(label) label.textContent = `${botCount} bot${botCount>1?'s':''} (${botCount+1} joueurs)`;
+    const minus = document.getElementById('botMinus');
+    const plus = document.getElementById('botPlus');
+    if(minus) minus.disabled = botCount<=BOT_COUNT_MIN;
+    if(plus) plus.disabled = botCount>=BOT_COUNT_MAX;
+  }
+  document.getElementById('botMinus').addEventListener('click', ()=>{
+    botCount = Math.max(BOT_COUNT_MIN, botCount-1);
+    updateBotCountLabel();
+    savePrefs();
+  });
+  document.getElementById('botPlus').addEventListener('click', ()=>{
+    botCount = Math.min(BOT_COUNT_MAX, botCount+1);
+    updateBotCountLabel();
+    savePrefs();
+  });
+  updateBotCountLabel();
+
   async function loadPrefs(){
     try{
       const res = await window.storage.get('prefs', false);
@@ -1643,12 +2030,22 @@
           difficulty = prefs.difficulty;
           [...diffRow.children].forEach(c=>c.classList.toggle('active', c.dataset.diff===difficulty));
         }
+        if(typeof prefs.botCount === 'number' && prefs.botCount>=BOT_COUNT_MIN && prefs.botCount<=BOT_COUNT_MAX){
+          botCount = prefs.botCount;
+          updateBotCountLabel();
+        }
+        if(prefs.selectedRoles && typeof prefs.selectedRoles === 'object'){
+          SPECIAL_ROLE_KEYS.forEach(r=>{
+            if(typeof prefs.selectedRoles[r] === 'boolean') selectedRoles[r] = prefs.selectedRoles[r];
+          });
+          renderRoleToggles();
+        }
       }
     }catch(e){ /* premier lancement, ou stockage indisponible : on garde les valeurs par défaut */ }
   }
 
   async function savePrefs(){
-    try{ await window.storage.set('prefs', JSON.stringify({sound:soundOn, difficulty}), false); }
+    try{ await window.storage.set('prefs', JSON.stringify({sound:soundOn, difficulty, botCount, selectedRoles}), false); }
     catch(e){ /* stockage indisponible : les préférences ne survivront pas à cette session */ }
   }
 
@@ -1665,11 +2062,18 @@
     showRole();
   });
   document.getElementById('btnRoleContinue').addEventListener('click', ()=>{
-    startNight();
+    proceedPreNight();
   });
   document.getElementById('btnReplay').addEventListener('click', ()=>{
     newGame();
     showRole();
+  });
+
+  // ---------- Retour au menu en cours de partie ----------
+  document.getElementById('btnGlobalMenu').addEventListener('click', ()=>{
+    if(window.isInMpRoom && window.isInMpRoom()) return; // c'est le gestionnaire multijoueur qui s'en occupe
+    if(!confirm('Retourner au menu ? Cette partie sera perdue.')) return;
+    show('home');
   });
 
   show('home');
@@ -1719,7 +2123,7 @@
   }catch(e){ console.warn('Firebase indisponible', e); db = null; }
 
   const ROOMS = 'lgRooms';
-  const AVATARS = ['🙂','😎','🧑‍🌾','🧙','🧑‍🚀','🥷','🧑‍🎤','🧑‍🍳','🧑‍🎨','🧑‍🔬','🧛','🧟','🦊','🐻','🐺','🐱',
+  const MP_AVATARS = ['🙂','😎','🧑‍🌾','🧙','🧑‍🚀','🥷','🧑‍🎤','🧑‍🍳','🧑‍🎨','🧑‍🔬','🧛','🧟','🦊','🐻','🐺','🐱',
     '🐨','🐼','🦁','🐯','🐵','🦉','🐸','🦄','🧑‍🚒','🧑‍✈️','🧑‍🎓','🧑‍🌾','🧑‍💻','🧑‍🎤'];
   const ROLE_META = {
     wolf:    { icon:'🐺', name:'Loup-Garou', cls:'wolf',    desc:"Chaque nuit, entends-toi avec les autres loups pour choisir une victime. Le jour, fonds-toi dans la foule." },
@@ -1799,7 +2203,21 @@
     document.querySelectorAll('#app main > section').forEach(el=>el.classList.add('hidden'));
     const el = screenById(id);
     if(el){ el.classList.remove('hidden'); el.classList.remove('entering'); void el.offsetWidth; el.classList.add('entering'); }
+    const menuBtn = document.getElementById('btnGlobalMenu');
+    if(menuBtn) menuBtn.style.display = (id==='mp-home') ? 'none' : '';
   }
+
+  window.isInMpRoom = function(){ return !!mp.code; };
+  document.getElementById('btnGlobalMenu').addEventListener('click', ()=>{
+    if(!mp.code) return; // pas en salon multijoueur : le gestionnaire du mode solo s'en occupe
+    if(!confirm('Quitter la partie et retourner au menu ?')) return;
+    leaveRoom();
+    document.querySelectorAll('#app main > section').forEach(el=>el.classList.add('hidden'));
+    const home = document.getElementById('screen-home');
+    if(home) home.classList.remove('hidden');
+    const menuBtn = document.getElementById('btnGlobalMenu');
+    if(menuBtn) menuBtn.style.display = 'none';
+  });
 
   function mpError(elId, msg){ const el=document.getElementById(elId); if(el) el.textContent = msg||''; }
 
@@ -1823,7 +2241,7 @@
         settings: defaultSettingsFor(1)
       });
       await db.collection(ROOMS).doc(code).collection('players').doc(uid).set({
-        name, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)],
+        name, avatar: MP_AVATARS[Math.floor(Math.random()*MP_AVATARS.length)],
         role:null, alive:true, isHost:true, joinedAt:Date.now(),
         nightAction:{}, dayVote:null, hunterUsed:false, witchLifeUsed:false, witchDeathUsed:false
       });
@@ -1857,7 +2275,7 @@
         const maxP = (roomData.settings && roomData.settings.maxPlayers) || 16;
         if(currentCount >= maxP){ mpError('mpHomeError',`Le salon est complet (${maxP} joueurs max).`); return; }
         const usedAvatars = (await roomRef.collection('players').get()).docs.map(d=>d.data().avatar);
-        const freeAvatar = AVATARS.find(a=>!usedAvatars.includes(a)) || AVATARS[Math.floor(Math.random()*AVATARS.length)];
+        const freeAvatar = MP_AVATARS.find(a=>!usedAvatars.includes(a)) || MP_AVATARS[Math.floor(Math.random()*MP_AVATARS.length)];
         await roomRef.collection('players').doc(uid).set({
           name, avatar:freeAvatar, role:null, alive:true, isHost:false, joinedAt:Date.now(),
           nightAction:{}, dayVote:null, hunterUsed:false, witchLifeUsed:false, witchDeathUsed:false
